@@ -51,8 +51,6 @@ public class ShopSlotUI : MonoBehaviour
     {
         actionButton.interactable = false;
         buttonText.text = "WAIT...";
-
-        // 1. Gọi Blockchain thực hiện mua NFT
         string result = await Web3Manager.Instance.BuyNFT(tokenId, priceETH);
 
         if (result == "success")
@@ -69,14 +67,12 @@ public class ShopSlotUI : MonoBehaviour
 
     IEnumerator TransferOwnership()
     {
-        // Xóa khỏi Marketplace
         string urlDel = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Marketplace/{marketDocId}";
         using (UnityWebRequest delReq = UnityWebRequest.Delete(urlDel))
         {
             yield return delReq.SendWebRequest();
         }
 
-        // Thêm vào Inventory người mua
         string urlAdd = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{Wallet}/Inventory";
         string jsonAdd = "{" +
         "\"fields\": {" +
@@ -100,7 +96,7 @@ public class ShopSlotUI : MonoBehaviour
 
             if (addReq.result == UnityWebRequest.Result.Success)
             {
-                InventoryManager.Instance?.OpenInventory();
+                //InventoryManager.Instance?.OpenInventory();
                 Destroy(gameObject);
             }
         }
@@ -136,7 +132,7 @@ public class ShopSlotUI : MonoBehaviour
                 {
                     yield return delReq.SendWebRequest();
                     yield return new WaitForSeconds(1.0f);
-                    InventoryManager.Instance?.OpenInventory();
+                    //InventoryManager.Instance?.OpenInventory();
                     Destroy(gameObject);
                 }
             }

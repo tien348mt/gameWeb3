@@ -8464,6 +8464,8 @@ MonoBehaviour:
   defense: 0
   currentHp: 0
   currentMana: 0
+  currentSTR: 0
+  currentDEF: 0
 --- !u!1 &715360919
 GameObject:
   m_ObjectHideFlags: 0

@@ -35,7 +35,7 @@ public class StatManager : MonoBehaviour
         TextAsset csvFile = Resources.Load<TextAsset>("PlayerStatus");
         if (csvFile == null)
         {
-            Debug.LogError("Khong tim thay file StatData trong Resources!");
+            Debug.LogError("Khong tim thay file PlayerStatus trong Resources!");
             return;
         }
 

@@ -21,6 +21,8 @@ public class PlayerStats : MonoBehaviour
     [Header("Current Status")]
     public float currentHp;
     public float currentMana;
+    public float currentSTR;
+    public float currentDEF;
 
     private void Awake()
     {
@@ -42,6 +44,14 @@ public class PlayerStats : MonoBehaviour
         LoadPlayerData();
     }
 
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.F)) 
+        {
+            AddExp(5);
+            currentHp -= 5;
+        }
+    }
     public void LoadPlayerData()
     {
         FirestoreManager db = FindObjectOfType<FirestoreManager>();
@@ -78,6 +88,8 @@ public class PlayerStats : MonoBehaviour
 
             this.currentHp = this.maxHp;
             this.currentMana = this.maxMana;
+            this.currentSTR = this.strength;
+            this.currentDEF = this.defense;
         }
     }
 
