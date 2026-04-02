@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using TMPro;
 
 public class InventoryManager : MonoBehaviour
@@ -16,97 +16,96 @@ public class InventoryManager : MonoBehaviour
     bool isInventoryOpen = false;
     public static InventoryManager Instance;
 
-    void Awake()
-    {
-        Instance = this;
-    }
+    void Awake() { Instance = this; }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.I))
         {
             isInventoryOpen = !isInventoryOpen;
-
-            if (isInventoryOpen)
-                OpenInventory();
-            else
-                CloseInventory();
+            if (isInventoryOpen) OpenInventory();
+            else CloseInventory();
+            Debug.Log("open");
         }
     }
 
     public void OpenInventory()
     {
         if (walletText == null) return;
-
-        // Lấy địa chỉ ví hiện tại từ UI
         string wallet = walletText.text.Trim();
-
-        // Kiểm tra nếu ví chưa được load (tránh lỗi gửi request trống)
-        if (string.IsNullOrEmpty(wallet) || wallet.Length < 10)
-        {
-            Debug.LogWarning("Ví chưa sẵn sàng!");
-            return;
-        }
+        if (string.IsNullOrEmpty(wallet) || wallet.Length < 10) return;
 
         inventory.SetActive(true);
-
-        // Xóa các ô cũ trước khi tải dữ liệu mới
         foreach (Transform child in contentParent) Destroy(child.gameObject);
-
         StartCoroutine(GetItems(wallet));
     }
 
-    public void CloseInventory()
-    {
-        inventory.SetActive(false);
-        isInventoryOpen = false;
-    }
+    public void CloseInventory() { inventory.SetActive(false); isInventoryOpen = false; }
 
     IEnumerator GetItems(string wallet)
     {
         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{wallet}/Inventory";
-        Debug.Log("Đang kết nối: " + url);
-
+        
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                string jsonResponse = request.downloadHandler.text;
-                Debug.Log("Dữ liệu về: " + jsonResponse);
+                Debug.LogError("Lỗi tải Inventory: " + request.error);
+                yield break;
+            }
 
-                // 1. Regex lấy Document ID (Để xóa khi bán)
-                // Lưu ý: Regex này lấy phần ID cuối cùng sau dấu gạch chéo cuối cùng của trường "name"
-                MatchCollection idMatches = Regex.Matches(jsonResponse, @"\""name\"": \""projects/[^/]+/databases/\(default\)/documents/Users/[^/]+/Inventory/([^\""]+)\""");
+            string json = request.downloadHandler.text;
+            
+            // Xử lý thủ công để tách từng document
+            string[] docs = json.Split(new string[] { "\"name\": \"projects/" }, System.StringSplitOptions.None);
 
-                // 2. Regex lấy ItemId (Lấy chính xác giá trị stringValue của trường itemId)
-                // Cải tiến Regex để bắt được itemId ngay cả khi cấu trúc Document thay đổi
-                MatchCollection itemMatches = Regex.Matches(jsonResponse, @"\""itemId\"":\s*\{\s*\""stringValue\"":\s*\""([^\""]+)\""");
+            for (int i = 1; i < docs.Length; i++)
+            {
+                string docContent = docs[i];
 
-                for (int i = 0; i < itemMatches.Count; i++)
+
+                // 1. Lấy docId
+                string[] nameSplit = docContent.Split('"');
+                string fullPath = nameSplit[0];
+                string[] pathParts = fullPath.Split('/');
+                string docId = pathParts[pathParts.Length - 1];
+
+                // 2. Lấy itemId (phải nằm trong khối "fields")
+                if (docContent.Contains("\"itemId\""))
                 {
-                    // Kiểm tra đảm bảo có đủ cả ID và dữ liệu item
-                    if (i < idMatches.Count)
+                    string[] splitId = docContent.Split(new string[] { "\"itemId\":" }, System.StringSplitOptions.None);
+                    string itemId = splitId[1].Split(new string[] { "\"stringValue\": \"" }, System.StringSplitOptions.None)[1].Split('"')[0];
+
+                    Debug.Log(">>> Đã tìm thấy ItemId từ Firebase: " + itemId);
+
+                    ItemData originalData = database.GetItemById(itemId);
+                    if (originalData != null)
                     {
-                        string docId = idMatches[i].Groups[1].Value;
-                        string itemId = itemMatches[i].Groups[1].Value;
+                        ItemData displayData = Instantiate(originalData);
+                        displayData.armor = GetFieldValue(docContent, "armor");
+                        displayData.attack = GetFieldValue(docContent, "attack");
+                        displayData.basePrice = GetFieldValue(docContent, "basePrice");
 
-                        ItemData data = database.GetItemById(itemId);
-                        if (data != null)
-                        {
-                            GameObject slot = Instantiate(slotPrefab, contentParent);
-                            // Setup ô đồ với dữ liệu, ví người sở hữu và mã Document trên Firebase
-                            slot.GetComponent<InventorySlotUI>().Setup(data, walletText, docId);
-
-                        }
+                        GameObject slot = Instantiate(slotPrefab, contentParent);
+                        slot.GetComponent<InventorySlotUI>().Setup(displayData, walletText, docId);
+                        Debug.Log(">>> Đã tạo xong slot cho: " + itemId + " aaa "+ docId);
                     }
                 }
             }
-            else
-            {
-                Debug.LogError("Lỗi tải Inventory: " + request.error);
-            }
         }
+    }
+
+    private string GetFieldValue(string content, string fieldName)
+    {
+        if (!content.Contains("\"" + fieldName + "\"")) return "";
+        string[] splitField = content.Split(new string[] { "\"" + fieldName + "\":" }, System.StringSplitOptions.None);
+        if (splitField.Length < 2) return "";
+        
+        // Tách lấy giá trị sau stringValue
+        string[] valSplit = splitField[1].Split(new string[] { "\"stringValue\": \"" }, System.StringSplitOptions.None);
+        if (valSplit.Length < 2) return "";
+        
+        return valSplit[1].Split('"')[0];
     }
 }

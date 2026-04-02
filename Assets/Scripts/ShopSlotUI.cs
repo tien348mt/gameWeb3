@@ -16,6 +16,7 @@ public class ShopSlotUI : MonoBehaviour
     private string sellerAddress;
     private string marketDocId;
     private string myWallet;
+    private string Wallet;
     private string priceETH;
     private string tokenId;
 
@@ -26,6 +27,7 @@ public class ShopSlotUI : MonoBehaviour
         sellerAddress = seller.Trim().ToLower();
         marketDocId = mDocId;
         myWallet = currentWallet.Trim().ToLower();
+        Wallet = currentWallet;
         tokenId = tId;
 
         iconImage.sprite = data.itemIcon;
@@ -75,12 +77,18 @@ public class ShopSlotUI : MonoBehaviour
         }
 
         // Thêm vào Inventory người mua
-        string urlAdd = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{myWallet}/Inventory";
-        string jsonAdd = "{\"fields\": {" +
-                         "\"itemId\": {\"stringValue\": \"" + itemData.itemId + "\"}," +
-                         "\"isMinted\": {\"booleanValue\": true}," +
-                         "\"tokenId\": {\"stringValue\": \"" + tokenId + "\"}" +
-                         "}}";
+        string urlAdd = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{Wallet}/Inventory";
+        string jsonAdd = "{" +
+        "\"fields\": {" +
+                "\"itemId\": {\"stringValue\": \"" + itemData.itemId + "\"}," +
+                "\"itemName\": {\"stringValue\": \"" + itemData.itemName + "\"}," +
+                "\"metadataUri\": {\"stringValue\": \"" + (itemData.metadataUri ?? "") + "\"}," +
+                "\"basePrice\": {\"stringValue\": \"" + itemData.basePrice + "\"}," +
+                "\"armor\": {\"stringValue\": \"" + itemData.armor + "\"}," +
+                "\"attack\": {\"stringValue\": \"" + itemData.attack + "\"}," +
+                "\"isMinted\": {\"booleanValue\": true}" +
+            "}" +
+        "}";
 
         using (UnityWebRequest addReq = new UnityWebRequest(urlAdd, "POST"))
         {
@@ -100,12 +108,18 @@ public class ShopSlotUI : MonoBehaviour
 
     IEnumerator ReturnItem()
     {
-        string urlAdd = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{myWallet}/Inventory";
-        string jsonAdd = "{\"fields\": {" +
-                         "\"itemId\": {\"stringValue\": \"" + itemData.itemId + "\"}," +
-                         "\"isMinted\": {\"booleanValue\": true}," +
-                         "\"tokenId\": {\"stringValue\": \"" + tokenId + "\"}" +
-                         "}}";
+        string urlAdd = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{Wallet}/Inventory";
+        string jsonAdd = "{" +
+        "\"fields\": {" +
+                "\"itemId\": {\"stringValue\": \"" + itemData.itemId + "\"}," +
+                "\"itemName\": {\"stringValue\": \"" + itemData.itemName + "\"}," +
+                "\"metadataUri\": {\"stringValue\": \"" + (itemData.metadataUri ?? "") + "\"}," +
+                "\"basePrice\": {\"stringValue\": \"" + itemData.basePrice + "\"}," +
+                "\"armor\": {\"stringValue\": \"" + itemData.armor + "\"}," +
+                "\"attack\": {\"stringValue\": \"" + itemData.attack + "\"}," +
+                "\"isMinted\": {\"booleanValue\": false}" +
+            "}" +
+        "}";
 
         using (UnityWebRequest addReq = new UnityWebRequest(urlAdd, "POST"))
         {
@@ -121,6 +135,7 @@ public class ShopSlotUI : MonoBehaviour
                 using (UnityWebRequest delReq = UnityWebRequest.Delete(urlDel))
                 {
                     yield return delReq.SendWebRequest();
+                    yield return new WaitForSeconds(1.0f);
                     InventoryManager.Instance?.OpenInventory();
                     Destroy(gameObject);
                 }

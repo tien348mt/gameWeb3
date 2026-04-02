@@ -3,9 +3,11 @@
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class ItemData : ScriptableObject
 {
-    public string itemId;       // ID duy nhất (ví dụ: sword_01)
-    public string itemName;     // Tên hiển thị
-    public Sprite itemIcon;     // Ảnh trong túi đồ
-    public string metadataUri;  // Link ảnh trên Pinata (nếu có sẵn)
-    public int basePrice;       // Giá cơ bản
+    public string itemId;       
+    public string itemName;     
+    public Sprite itemIcon;     
+    public string metadataUri;  
+    public string basePrice;     
+    public string armor;
+    public string attack;
 }

@@ -92,7 +92,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySlotUI
   iconImage: {fileID: 5524525775836542361}
   frameImage: {fileID: 5536028000969774160}
-  sellButton: {fileID: 3000707923597097006}
   actionButton: {fileID: 3000707923597097006}
   buttonText: {fileID: 2516783787635493078}
   walletText: {fileID: 891579743842812031, guid: 010ba813fe2a7f044a587a9eba3b9444, type: 3}
@@ -213,8 +212,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -13.2399, y: 13.2399}
-  m_SizeDelta: {x: 73.5202, y: 73.5202}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 37.017, y: 37.017}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8170688397956605932
 CanvasRenderer:
@@ -288,10 +287,10 @@ RectTransform:
   - {fileID: 1801179829323525563}
   m_Father: {fileID: 3586815930171597193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 66.23688, y: 1.5}
-  m_SizeDelta: {x: 58.8737, y: 30}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 93, y: 0.00000023841858}
+  m_SizeDelta: {x: 58.873703, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3134270495902660568
 CanvasRenderer:
@@ -407,10 +406,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 8965011229741926943}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -13.5, y: 13.2}
-  m_SizeDelta: {x: 77.1512, y: 77.1512}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: -0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &797308796835293012
 CanvasRenderer:
@@ -433,14 +432,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9245283, g: 0.7695944, b: 0.075008824, a: 0.6156863}
+  m_Color: {r: 0.9245283, g: 0.78431374, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 1525880607500337943, guid: afc3cea3b5b8fdb4885107c72d571940, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

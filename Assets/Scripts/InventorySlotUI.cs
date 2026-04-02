@@ -24,7 +24,7 @@ public class InventorySlotUI : MonoBehaviour
         walletText = wallet;
         documentId = docId;
         isMinted = mintedStatus;
-
+     
         if (currentItem != null)
         {
             iconImage.sprite = currentItem.itemIcon;
@@ -68,13 +68,14 @@ public class InventorySlotUI : MonoBehaviour
         try
         {
             // 1. Thực hiện Mint
-            string tokenId = await Web3Manager.Instance.MintNFT(myWallet, currentItem.itemId);
+            string tokenId = await Web3Manager.Instance.MintNFT(myWallet, currentItem.itemId, currentItem, documentId);
 
             if (tokenId != "failed")
             {
                 // Đẩy Firebase ngay lập tức (Vì bạn đã thấy dữ liệu lên Firebase thành công)
-                Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.PostToMarketplace(tokenId, myWallet, currentItem.itemId));
-                Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.UpdateFirebaseMintStatus(tokenId, documentId, myWallet));
+                Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.PostToMarketplace(tokenId, myWallet, currentItem.itemId, currentItem));
+                //Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.UpdateFirebaseMintStatus(tokenId, documentId, myWallet));
+                Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.DeleteItemFromFirebase(myWallet, documentId,this.gameObject));
 
                 // 2. Chuyển sang trạng thái thành công luôn để giải thoát UI
                 SetAsNFTStyle();
@@ -82,7 +83,7 @@ public class InventorySlotUI : MonoBehaviour
 
                 // 3. Gọi lệnh List chạy ngầm (Sử dụng hàm listItem viết thường)
                 // Không dùng await vì ví Local có thể chưa có Gas, nếu đợi sẽ treo UI
-                _ = Web3Manager.Instance.ListNFT(tokenId, "0.001");
+                _ = Web3Manager.Instance.ListNFT(tokenId, currentItem.basePrice);
             }
             else
             {

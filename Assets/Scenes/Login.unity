@@ -832,6 +832,14 @@ PrefabInstance:
       propertyPath: OnDisconnect.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 7467734776442246903, guid: ec4cc1f00e10941488fd2b8beddb91c0, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 7467734776442246903, guid: ec4cc1f00e10941488fd2b8beddb91c0, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7646532757676611247, guid: ec4cc1f00e10941488fd2b8beddb91c0, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

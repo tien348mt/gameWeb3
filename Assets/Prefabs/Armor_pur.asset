@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bdc0b0f5465d6443a88fa3c2ca37e85, type: 3}
+  m_Name: Armor_pur
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemId: Amor2
+  itemName: Amor_pur
+  itemIcon: {fileID: -1045133410153605164, guid: bbe964cc5ff538842bff8aa597a4d05a, type: 3}
+  metadataUri: ipfs://bafkreie7vr2h2fypya4czvyfdxkkxzfv4tyiqbafakxxiyycme6dnewgge
+  basePrice: 0.001
+  armor: 20
+  attack: 10

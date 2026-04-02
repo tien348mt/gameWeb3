@@ -36,7 +36,6 @@ public class MarketplaceManager : MonoBehaviour
 
     IEnumerator LoadMarketplace()
     {
-        // Đảm bảo chữ Marketplace viết hoa đúng như trên Firebase của bạn
         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Marketplace";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
@@ -45,13 +44,12 @@ public class MarketplaceManager : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                // Xóa các item cũ trong UI
                 foreach (Transform child in shopContentParent) Destroy(child.gameObject);
 
                 string jsonResponse = request.downloadHandler.text;
                 Debug.Log("Dữ liệu nhận được: " + jsonResponse);
 
-                // Regex cải tiến: Sử dụng \s* để bỏ qua mọi khoảng trắng hoặc xuống dòng dư thừa
+               
                 MatchCollection idMatches = Regex.Matches(jsonResponse, @"\""name\"":\s*\""projects/[^/]+/databases/\(default\)/documents/Marketplace/([^\""]+)\""");
                 MatchCollection items = Regex.Matches(jsonResponse, @"\""itemId\"":\s*\{\s*\""stringValue\"":\s*\""([^\""]+)\""");
                 MatchCollection prices = Regex.Matches(jsonResponse, @"\""price\"":\s*\{\s*\""stringValue\"":\s*\""([^\""]+)\""");
@@ -60,13 +58,12 @@ public class MarketplaceManager : MonoBehaviour
 
                 string currentMyWallet = (walletText != null) ? walletText.text.Trim() : "";
 
-                // Tính toán số lượng vật phẩm hợp lệ (dựa trên số lượng itemId tìm thấy)
+                
                 int count = items.Count;
                 Debug.Log($"Tìm thấy {count} vật phẩm hợp lệ trên Marketplace.");
 
                 for (int i = 0; i < count; i++)
                 {
-                    // Kiểm tra an toàn để tránh lỗi IndexOutOfRange
                     if (i >= idMatches.Count || i >= prices.Count || i >= sellers.Count || i >= tokenIds.Count)
                     {
                         Debug.LogWarning($"Vật phẩm thứ {i} bị thiếu dữ liệu trường nào đó trên Firebase.");

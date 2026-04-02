@@ -15,5 +15,7 @@ MonoBehaviour:
   itemId: Armor1
   itemName: Armor_red
   itemIcon: {fileID: -5750353039905602045, guid: 1ee6584543545524cb6aad9ddba24ac0, type: 3}
-  metadataUri: 
-  basePrice: 1
+  metadataUri: ipfs://bafkreidaaasgjwzoa23wfshm3pjh6tz5hl2imctm334arxgel5sz4twodm
+  basePrice: 0.001
+  armor: 10
+  attack: 

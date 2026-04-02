@@ -7,11 +7,12 @@ using System.Numerics;
 using UnityEngine.Networking;
 using System.Collections;
 using System;
+using NUnit.Framework.Interfaces;
 
 public class Web3Manager : MonoBehaviour
 {
     public static Web3Manager Instance;
-    public TextMeshProUGUI error; // Kéo object 'Loi' vào đây
+    public TextMeshProUGUI error;
     public TextMeshProUGUI walletText;
 
     private string contractAddress = "0xf8c7f0840208e12d69b5A4f5B467Fd1B2B9Ca2DC";
@@ -31,7 +32,6 @@ public class Web3Manager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    // Hàm phụ trợ để hiện lỗi lên màn hình
     private void ShowError(string msg)
     {
         if (error != null) error.text = msg;
@@ -39,27 +39,27 @@ public class Web3Manager : MonoBehaviour
     }
 
     // ================= MINT =================
-    public async Task<string> MintNFT(string walletAddress, string itemID)
+    public async Task<string> MintNFT(string walletAddress, string itemID, ItemData item, string docId)
     {
         ShowError("Đang mint NFT...");
         try
         {
             var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress, contractABI);
 
-            string uri = "ipfs://bafkreidaaasgjwzoa23wfshm3pjh6tz5hl2imctm334arxgel5sz4twodm";
+            string uri = item.metadataUri;
+            //"ipfs://bafkreidaaasgjwzoa23wfshm3pjh6tz5hl2imctm334arxgel5sz4twodm";
+            //"ipfs://bafkreie7vr2h2fypya4czvyfdxkkxzfv4tyiqbafakxxiyycme6dnewgge";
 
-            // 1. Mint
             await contract.Write("mintItem", walletAddress, uri);
 
-            // 2. Đọc nextTokenId
             var nextId = await contract.Read<BigInteger>("nextTokenId");
 
-            // 3. Token vừa mint = nextId - 1
             BigInteger mintedId = nextId - 1;
 
             string tokenId = mintedId.ToString();
 
-            ShowError("Mint thành công! TokenID: " + tokenId);
+            ShowError("Mint thành công!" + uri);
+            
             return tokenId;
         }
         catch (System.Exception e)
@@ -81,7 +81,7 @@ public class Web3Manager : MonoBehaviour
         try
         {
             var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress, contractABI);
-            string priceWeiString = Utils.ToWei(priceEth); // Lấy chuỗi Wei từ Utils
+            string priceWeiString = Utils.ToWei(priceEth);
             BigInteger priceWei = BigInteger.Parse(priceWeiString);
             string myAddress = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
 
@@ -91,7 +91,6 @@ public class Web3Manager : MonoBehaviour
                 await contract.Write("setApprovalForAll", contractAddress, true);
             }
 
-            // Lưu ý: listItem nhận uint256 nên truyền BigInteger là đúng
             await contract.Write("listItem", tokenId, priceWei);
             return "success";
         }
@@ -109,16 +108,13 @@ public class Web3Manager : MonoBehaviour
         {
             var contract = ThirdwebManager.Instance.SDK.GetContract(contractAddress, contractABI);
 
-            // 1. Kiểm tra giá trị đầu vào
             Debug.Log("--- DEBUG BUY ---");
             Debug.Log("Token ID: " + tokenId);
             Debug.Log("Giá nhận từ UI (Eth): " + priceEth);
 
-            // 2. Kiểm tra giá trị sau khi đổi sang Wei
             string valueWei = Utils.ToWei(priceEth);
             Debug.Log("Giá trị gửi lên Blockchain (Wei): " + valueWei);
 
-            // 3. Kiểm tra ví đang thực hiện giao dịch (Tránh nhầm ví Local)
             string currentWallet = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
             Debug.Log("Địa chỉ ví đang gọi lệnh mua: " + currentWallet);
 
@@ -135,14 +131,12 @@ public class Web3Manager : MonoBehaviour
         {
             if (e.Message.Contains("eth_getTransactionReceipt")) return "success";
 
-            // In chi tiết lỗi ra Console để soi mã lỗi Blockchain
             Debug.LogError("Lỗi chi tiết: " + e.ToString());
             ShowError("Buy lỗi: " + e.Message);
             return "failed";
         }
     }
 
-    // --- Logout và Firebase giữ nguyên ---
     public void Logout()
     {
         ThirdwebManager.Instance.SDK.wallet.Disconnect();
@@ -165,13 +159,15 @@ public class Web3Manager : MonoBehaviour
         }
     }
 
-    public IEnumerator PostToMarketplace(string tokenId, string sellerWallet, string itemId)
+    public IEnumerator PostToMarketplace(string tokenId, string sellerWallet, string itemId, ItemData item)
     {
         string urlMarket = "https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Marketplace";
         string jsonData = "{\"fields\": {" +
                           "\"tokenId\": {\"stringValue\": \"" + tokenId + "\"}," +
                           "\"itemId\": {\"stringValue\": \"" + itemId + "\"}," +
-                          "\"price\": {\"stringValue\": \"0.001\"}," +
+                          "\"price\": {\"stringValue\": \"" + item.basePrice + "\"}," +
+                          "\"armor\": {\"stringValue\": \"" + item.armor + "\"}," +
+                          "\"attack\": {\"stringValue\": \"" + item.attack + "\"}," +
                           "\"seller\": {\"stringValue\": \"" + sellerWallet + "\"}" +
                           "}}";
 
@@ -200,6 +196,29 @@ public class Web3Manager : MonoBehaviour
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
             yield return request.SendWebRequest();
+        }
+    }
+    public IEnumerator DeleteItemFromFirebase(string wallet, string docId, GameObject uiSlot)
+    {
+        string url = $"https://firestore.googleapis.com/v1/projects/gamelord1-49c71/databases/(default)/documents/Users/{wallet}/Inventory/{docId}";
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "DELETE"))
+        {
+            request.downloadHandler = new DownloadHandlerBuffer();
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log(">>> Đã xóa item khỏi Firebase thành công!" + wallet +" aaa " + docId);
+                if (uiSlot != null)
+                {
+                    Destroy(uiSlot);
+                }
+            }
+            else
+            {
+                Debug.LogError(">>> Lỗi xóa Firebase: " + request.error);
+            }
         }
     }
 }
