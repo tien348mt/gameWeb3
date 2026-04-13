@@ -82,6 +82,8 @@ public class ShopSlotUI : MonoBehaviour
                 "\"basePrice\": {\"stringValue\": \"" + itemData.basePrice + "\"}," +
                 "\"armor\": {\"stringValue\": \"" + itemData.armor + "\"}," +
                 "\"attack\": {\"stringValue\": \"" + itemData.attack + "\"}," +
+                "\"hp\": {\"stringValue\": \"" + itemData.hp + "\"}," +
+                "\"mana\": {\"stringValue\": \"" + itemData.mana + "\"}," +
                 "\"isMinted\": {\"booleanValue\": true}" +
             "}" +
         "}";
@@ -113,6 +115,8 @@ public class ShopSlotUI : MonoBehaviour
                 "\"basePrice\": {\"stringValue\": \"" + itemData.basePrice + "\"}," +
                 "\"armor\": {\"stringValue\": \"" + itemData.armor + "\"}," +
                 "\"attack\": {\"stringValue\": \"" + itemData.attack + "\"}," +
+                "\"hp\": {\"stringValue\": \"" + itemData.hp + "\"}," +
+                "\"mana\": {\"stringValue\": \"" + itemData.mana + "\"}," +
                 "\"isMinted\": {\"booleanValue\": false}" +
             "}" +
         "}";

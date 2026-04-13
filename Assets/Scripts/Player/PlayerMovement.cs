@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movement;
     private int FacingDirection = 1;
-
+    
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();

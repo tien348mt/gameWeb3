@@ -46,22 +46,24 @@ public class PlayerStats : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.F)) 
-        {
-            AddExp(5);
-            currentHp -= 5;
-        }
+       
     }
     public void LoadPlayerData()
     {
         FirestoreManager db = FindObjectOfType<FirestoreManager>();
         if (db != null)
         {
-            db.LoadPlayerStats(walletAddress, (lv, exp, pos) =>
+            db.LoadPlayerStats(walletAddress, (lv,exp, hp, mana, str, def,maxHP, maxMana, pos) =>
             {
                 this.level = lv;
                 this.currentExp = exp;
                 StartCoroutine(WaitAndUpdateStats(lv, pos));
+                this.currentHp = hp;
+                this.currentMana = mana;
+                this.strength = str;
+                this.defense = def;
+                this.maxHp = maxHP;
+                this.maxMana = maxMana;
             });
         }
     }
@@ -80,16 +82,16 @@ public class PlayerStats : MonoBehaviour
         if (data != null)
         {
             this.level = data.Level;
-            this.maxHp = data.HP;
-            this.maxMana = data.MANA;
-            this.strength = data.STR;
-            this.defense = data.DEF;
+            this.maxHp += data.HP;
+            this.maxMana += data.MANA;
+            this.strength += data.STR;
+            this.defense += data.DEF;
             this.requiredExp = data.EXP;
 
             this.currentHp = this.maxHp;
             this.currentMana = this.maxMana;
-            this.currentSTR = this.strength;
-            this.currentDEF = this.defense;
+            /*this.currentSTR = this.strength;
+            this.currentDEF = this.defense;*/
         }
     }
 
@@ -110,7 +112,10 @@ public class PlayerStats : MonoBehaviour
         FirestoreManager db = FindObjectOfType<FirestoreManager>();
         if (db != null)
         {
-            db.SavePlayerStats(walletAddress, level, currentExp, currentHp, currentMana, strength, defense, transform.position);
+            db.SavePlayerStats(walletAddress, level, currentExp, currentHp, currentMana, strength, defense, maxHp, maxMana, transform.position);
+            LoadStatsPlayer.instance.Information();
+            PlayerHealth.instance.UplevelInformationUI();
+            
         }
     }
 

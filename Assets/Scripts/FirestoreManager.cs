@@ -3,18 +3,19 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using UnityEngine.Rendering;
 
 public class FirestoreManager : MonoBehaviour
 {
     private string projectId = "gamelord1-49c71";
 
     /********************************* PlayerStats *******************************/
-    public void SavePlayerStats(string wallet, int level, int exp, float hp, float mana, float str, float def, Vector3 pos)
+    public void SavePlayerStats(string wallet, int level, int exp, float hp, float mana, float str, float def,float maxHP, float maxMana, Vector3 pos)
     {
-        StartCoroutine(PatchStatsToFirestore(wallet, level, exp, hp, mana, str, def, pos));
+        StartCoroutine(PatchStatsToFirestore(wallet, level, exp, hp, mana, str, def,maxHP,maxMana, pos));
     }
 
-    IEnumerator PatchStatsToFirestore(string wallet, int level, int exp, float hp, float mana, float str, float def, Vector3 pos)
+    IEnumerator PatchStatsToFirestore(string wallet, int level, int exp, float hp, float mana, float str, float def, float maxHP, float maxMana, Vector3 pos)
     {
         string cleanWallet = wallet.Trim();
         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}?updateMask.fieldPaths=stats";
@@ -23,6 +24,8 @@ public class FirestoreManager : MonoBehaviour
         string manaS = mana.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         string strS = str.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         string defS = def.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+        string maxhpS = maxHP.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+        string maxmanaS = maxMana.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         string posS = $"{pos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{pos.y.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{pos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}";
         
         string json = "{" +
@@ -36,6 +39,8 @@ public class FirestoreManager : MonoBehaviour
                             "\"mana\": {\"doubleValue\": " + manaS + "}," +
                             "\"strength\": {\"doubleValue\": " + strS + "}," +
                             "\"defense\": {\"doubleValue\": " + defS + "}," +
+                            "\"maxHP\": {\"doubleValue\": " + maxhpS + "}," +
+                            "\"maxMana\": {\"doubleValue\": " + maxmanaS + "}," +
                             "\"lastPosition\": {\"stringValue\": \"" + posS + "\"}" +
                         "}" +
                     "}" +
@@ -62,7 +67,7 @@ public class FirestoreManager : MonoBehaviour
     }
 
     /********************************* Load PlayerStats *******************************/
-    public delegate void OnStatsLoaded(int level, int exp, Vector3 position);
+    public delegate void OnStatsLoaded(int level, int exp, float hp, float mana, float str, float def, float maxHP, float maxMana, Vector3 position);
 
     public void LoadPlayerStats(string wallet, OnStatsLoaded callback)
     {
@@ -84,14 +89,31 @@ public class FirestoreManager : MonoBehaviour
 
                 int lv = 1;
                 int exp = 0;
+                float hp = 0; float mana = 0; float str = 0; float def = 0;
+                float maxHP = 0; float maxMana = 0;
                 Vector3 pos = Vector3.zero;
 
                 string lvStr = ExtractValue(text, "level", "integerValue");
                 string expStr = ExtractValue(text, "exp", "integerValue");
+
+                string hpStr = ExtractValue(text, "hp", "doubleValue") ?? ExtractValue(text, "hp", "integerValue");
+                string manaStr = ExtractValue(text, "mana", "doubleValue") ?? ExtractValue(text, "mana", "integerValue");
+                string strStr = ExtractValue(text, "strength", "doubleValue") ?? ExtractValue(text, "strength", "integerValue");
+                string defStr = ExtractValue(text, "defense", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
+                string maxhpStr = ExtractValue(text, "maxHP", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
+                string maxmanaStr = ExtractValue(text, "maxMana", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
+
                 string posStr = ExtractValue(text, "lastPosition", "stringValue");
 
                 if (!string.IsNullOrEmpty(lvStr)) int.TryParse(lvStr, out lv);
                 if (!string.IsNullOrEmpty(expStr)) int.TryParse(expStr, out exp);
+
+                hp = ParseFloatSafe(hpStr);
+                mana = ParseFloatSafe(manaStr);
+                str = ParseFloatSafe(strStr);
+                def = ParseFloatSafe(defStr);
+                maxHP = ParseFloatSafe(maxhpStr);
+                maxMana = ParseFloatSafe(maxmanaStr);
 
                 if (!string.IsNullOrEmpty(posStr) && posStr.Contains(","))
                 {
@@ -106,12 +128,12 @@ public class FirestoreManager : MonoBehaviour
                 if (lv <= 0) lv = 1;
 
                 Debug.Log($">>> KẾT QUẢ: Lv {lv}, Exp {exp}, Pos {pos}");
-                callback?.Invoke(lv, exp, pos);
+                callback?.Invoke(lv, exp, hp, mana, str, def,maxHP,maxMana, pos);
             }
             else
             {
-                callback?.Invoke(1, 0, Vector3.zero);
-                SavePlayerStats(wallet, 1, 0, 20f, 15f, 10f, 5f, Vector3.zero);
+                callback?.Invoke(1, 0, 20, 15, 5, 15,20,15, Vector3.zero);
+                SavePlayerStats(wallet, 1, 0, 20f, 15f, 10f, 5f,20f,15f, Vector3.zero);
             }
         }
     }
@@ -125,6 +147,18 @@ public class FirestoreManager : MonoBehaviour
             return match.Groups[1].Value.Trim();
 
         return null;
+    }
+ 
+    private float ParseFloatSafe(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        float result;
+        if (float.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out result))
+        {
+            return result;
+        }
+
+        return 0;
     }
 
     /*********************************POST Items*******************************/
@@ -147,6 +181,8 @@ public class FirestoreManager : MonoBehaviour
                 "\"basePrice\": {\"stringValue\": \"" + item.basePrice + "\"}," +
                 "\"armor\": {\"stringValue\": \"" + item.armor + "\"}," +
                 "\"attack\": {\"stringValue\": \"" + item.attack + "\"}," +
+                "\"hp\": {\"stringValue\": \"" + item.hp + "\"}," +
+                "\"mana\": {\"stringValue\": \"" + item.mana + "\"}," +
                 "\"isMinted\": {\"booleanValue\": false}" +
             "}" +
         "}";

@@ -168,6 +168,8 @@ public class Web3Manager : MonoBehaviour
                           "\"price\": {\"stringValue\": \"" + item.basePrice + "\"}," +
                           "\"armor\": {\"stringValue\": \"" + item.armor + "\"}," +
                           "\"attack\": {\"stringValue\": \"" + item.attack + "\"}," +
+                          "\"hp\": {\"stringValue\": \"" + item.hp + "\"}," +
+                          "\"mana\": {\"stringValue\": \"" + item.mana + "\"}," +
                           "\"seller\": {\"stringValue\": \"" + sellerWallet + "\"}" +
                           "}}";
 
