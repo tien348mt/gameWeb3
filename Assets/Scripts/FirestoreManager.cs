@@ -4,15 +4,27 @@ using System.Collections;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public class FirestoreManager : MonoBehaviour
 {
+    public static FirestoreManager Instance;
     private string projectId = "gamelord1-49c71";
 
-    /********************************* PlayerStats *******************************/
-    public void SavePlayerStats(string wallet, int level, int exp, float hp, float mana, float str, float def,float maxHP, float maxMana, Vector3 pos)
+    private void Awake()
     {
-        StartCoroutine(PatchStatsToFirestore(wallet, level, exp, hp, mana, str, def,maxHP,maxMana, pos));
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else Destroy(gameObject);
+    }
+
+    /********************************* PlayerStats *******************************/
+    public void SavePlayerStats(string wallet, int level, int exp, float hp, float mana, float str, float def, float maxHP, float maxMana, Vector3 pos)
+    {
+        StartCoroutine(PatchStatsToFirestore(wallet, level, exp, hp, mana, str, def, maxHP, maxMana, pos));
     }
 
     IEnumerator PatchStatsToFirestore(string wallet, int level, int exp, float hp, float mana, float str, float def, float maxHP, float maxMana, Vector3 pos)
@@ -27,7 +39,7 @@ public class FirestoreManager : MonoBehaviour
         string maxhpS = maxHP.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         string maxmanaS = maxMana.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         string posS = $"{pos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{pos.y.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)},{pos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}";
-        
+
         string json = "{" +
             "\"fields\": {" +
                 "\"stats\": {" +
@@ -66,6 +78,7 @@ public class FirestoreManager : MonoBehaviour
         }
     }
 
+
     /********************************* Load PlayerStats *******************************/
     public delegate void OnStatsLoaded(int level, int exp, float hp, float mana, float str, float def, float maxHP, float maxMana, Vector3 position);
 
@@ -77,20 +90,47 @@ public class FirestoreManager : MonoBehaviour
     IEnumerator GetStatsFromFirestore(string wallet, OnStatsLoaded callback)
     {
         string cleanWallet = wallet.Trim();
-        string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
+
+        string url =
+            $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
 
+            if (request.responseCode == 404)
+            {
+                Debug.Log(">>> Không tìm thấy nhân vật, tạo mới");
+
+                callback?.Invoke(1, 0, 20f, 15f, 5f, 15f, 20f, 15f, Vector3.zero);
+                SavePlayerStats(wallet, 1, 0, 20f, 15f, 10f, 5f, 20f, 15f, Vector3.zero);
+
+                yield break;
+            }
+
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string text = request.downloadHandler.text;
 
+                if (!text.Contains("\"fields\""))
+                {
+                    Debug.Log(">>> Không có dữ liệu -> tạo nhân vật mới");
+
+                    callback?.Invoke(1, 0, 20f, 15f, 10f, 5f, 20f, 15f, Vector3.zero);
+
+                    SavePlayerStats(wallet, 1, 0, 20f, 15f, 10f, 5f, 20f, 15f, Vector3.zero);
+
+                    yield break;
+                }
+
                 int lv = 1;
                 int exp = 0;
-                float hp = 0; float mana = 0; float str = 0; float def = 0;
-                float maxHP = 0; float maxMana = 0;
+                float hp = 0;
+                float mana = 0;
+                float str = 0;
+                float def = 0;
+                float maxHP = 0;
+                float maxMana = 0;
                 Vector3 pos = Vector3.zero;
 
                 string lvStr = ExtractValue(text, "level", "integerValue");
@@ -100,8 +140,8 @@ public class FirestoreManager : MonoBehaviour
                 string manaStr = ExtractValue(text, "mana", "doubleValue") ?? ExtractValue(text, "mana", "integerValue");
                 string strStr = ExtractValue(text, "strength", "doubleValue") ?? ExtractValue(text, "strength", "integerValue");
                 string defStr = ExtractValue(text, "defense", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
-                string maxhpStr = ExtractValue(text, "maxHP", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
-                string maxmanaStr = ExtractValue(text, "maxMana", "doubleValue") ?? ExtractValue(text, "defense", "integerValue");
+                string maxhpStr = ExtractValue(text, "maxHP", "doubleValue") ?? ExtractValue(text, "maxHP", "integerValue");
+                string maxmanaStr = ExtractValue(text, "maxMana", "doubleValue") ?? ExtractValue(text, "maxMana", "integerValue");
 
                 string posStr = ExtractValue(text, "lastPosition", "stringValue");
 
@@ -125,15 +165,11 @@ public class FirestoreManager : MonoBehaviour
                         float.TryParse(p[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out pos.z);
                     }
                 }
+
                 if (lv <= 0) lv = 1;
 
-                Debug.Log($">>> KẾT QUẢ: Lv {lv}, Exp {exp}, Pos {pos}");
-                callback?.Invoke(lv, exp, hp, mana, str, def,maxHP,maxMana, pos);
-            }
-            else
-            {
-                callback?.Invoke(1, 0, 20, 15, 5, 15,20,15, Vector3.zero);
-                SavePlayerStats(wallet, 1, 0, 20f, 15f, 10f, 5f,20f,15f, Vector3.zero);
+                Debug.Log($">>> LOAD NHÂN VẬT: Lv {lv}, Exp {exp}, Pos {pos}");
+                callback?.Invoke(lv, exp, hp, mana, str, def, maxHP, maxMana, pos);
             }
         }
     }
@@ -148,7 +184,7 @@ public class FirestoreManager : MonoBehaviour
 
         return null;
     }
- 
+
     private float ParseFloatSafe(string value)
     {
         if (string.IsNullOrEmpty(value)) return 0;
@@ -160,6 +196,7 @@ public class FirestoreManager : MonoBehaviour
 
         return 0;
     }
+
 
     /*********************************POST Items*******************************/
     public void AddItemToInventory(string wallet, ItemData item)
@@ -204,6 +241,285 @@ public class FirestoreManager : MonoBehaviour
             {
                 Debug.LogError(">>> LỖI FIREBASE: " + request.downloadHandler.text);
             }
+        }
+    }
+
+
+
+    /********************************* QUEST SYSTEM - LƯU THEO WALLET ID *******************************/
+
+    public void SavePlayerQuests(string wallet, List<QuestManager.QuestProgress> activeQuests, List<string> completedQuests, List<string> destroyedObjects)
+    {
+        StartCoroutine(PatchQuestsToFirestore(wallet, activeQuests, completedQuests, destroyedObjects));
+    }
+
+    IEnumerator PatchQuestsToFirestore(string wallet, List<QuestManager.QuestProgress> active, List<string> completed, List<string> destroyed)
+    {
+        string cleanWallet = wallet.Trim();
+
+        string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}" +
+                     "?updateMask.fieldPaths=activeQuests" +
+                     "&updateMask.fieldPaths=completedQuests" +
+                     "&updateMask.fieldPaths=permanentlyDestroyedObjects";
+
+        string activeFields = "";
+
+        foreach (var q in active)
+        {
+            string objs = string.Join(",", q.completedObjectives.ConvertAll(o =>
+                "{\"stringValue\": \"" + o + "\"}"));
+
+            activeFields += "\"" + q.questID +
+                            "\": {\"mapValue\": {\"fields\": {" +
+                            "\"completedObjectives\": {\"arrayValue\": {\"values\": [" + objs + "]}}," +
+                            "\"isCompleted\": {\"booleanValue\": " + q.isCompleted.ToString().ToLower() + "}" +
+                            "}}},";
+        }
+
+        if (activeFields.EndsWith(",")) activeFields = activeFields.TrimEnd(',');
+
+        string completedArray = string.Join(",", completed.ConvertAll(c =>
+            "{\"stringValue\": \"" + c + "\"}"));
+
+        string destroyedArray = string.Join(",", destroyed.ConvertAll(d =>
+            "{\"stringValue\": \"" + d + "\"}"));
+
+        string json =
+        "{" +
+            "\"fields\": {" +
+                "\"activeQuests\": {\"mapValue\": {\"fields\": {" + activeFields + "}}}," +
+                "\"completedQuests\": {\"arrayValue\": {\"values\": [" + completedArray + "]}}," +
+                "\"permanentlyDestroyedObjects\": {\"arrayValue\": {\"values\": [" + destroyedArray + "]}}" +
+            "}" +
+        "}";
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            request.method = "PATCH";
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log("<color=green>>>> QUEST DATA SAVED TO FIREBASE!</color>");
+            else
+                Debug.LogError(">>> QUEST SAVE ERROR: " + request.downloadHandler.text);
+        }
+    }
+
+    public delegate void OnQuestsLoaded(List<QuestManager.QuestProgress> activeQuests, List<string> completedQuests, List<string> destroyedObjects);
+
+    public void LoadPlayerQuests(string wallet, OnQuestsLoaded callback)
+    {
+        StartCoroutine(GetQuestsFromFirestore(wallet, callback));
+    }
+
+    IEnumerator GetQuestsFromFirestore(string wallet, OnQuestsLoaded callback)
+    {
+        string cleanWallet = wallet.Trim();
+
+        string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string text = request.downloadHandler.text;
+
+                List<QuestManager.QuestProgress> active = new List<QuestManager.QuestProgress>();
+                List<string> completed = new List<string>();
+                List<string> destroyed = new List<string>();
+
+                Match compMatch = Regex.Match(
+                    text,
+                    @"""completedQuests""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
+                    RegexOptions.Singleline);
+
+                if (compMatch.Success)
+                {
+                    MatchCollection ids = Regex.Matches(
+                        compMatch.Groups[1].Value,
+                        @"""stringValue""\s*:\s*""([^""]+)""");
+
+                    foreach (Match m in ids)
+                        completed.Add(m.Groups[1].Value);
+                }
+
+                Match destMatch = Regex.Match(
+                    text,
+                    @"""permanentlyDestroyedObjects""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
+                    RegexOptions.Singleline);
+
+                if (destMatch.Success)
+                {
+                    MatchCollection ids = Regex.Matches(
+                        destMatch.Groups[1].Value,
+                        @"""stringValue""\s*:\s*""([^""]+)""");
+
+                    foreach (Match m in ids)
+                        destroyed.Add(m.Groups[1].Value);
+                }
+
+                Match activeMatch = Regex.Match(
+                    text,
+                    @"""activeQuests""\s*:\s*\{[^}]*""fields""\s*:\s*\{(.*?)\}\s*\}",
+                    RegexOptions.Singleline);
+
+                if (activeMatch.Success)
+                {
+                    string fieldsStr = activeMatch.Groups[1].Value;
+
+                    MatchCollection questMatches = Regex.Matches(
+                        fieldsStr,
+                        @"""([^""]+)""\s*:\s*\{[^}]*completedObjectives[^[]*\[(.*?)\][^}]*booleanValue""\s*:\s*(true|false)",
+                        RegexOptions.Singleline);
+
+                    foreach (Match m in questMatches)
+                    {
+                        QuestManager.QuestProgress qp = new QuestManager.QuestProgress
+                        {
+                            questID = m.Groups[1].Value,
+                            isCompleted = m.Groups[3].Value.ToLower() == "true"
+                        };
+
+                        string objStr = m.Groups[2].Value;
+
+                        MatchCollection objMatches = Regex.Matches(
+                            objStr,
+                            @"""stringValue""\s*:\s*""([^""]+)""");
+
+                        foreach (Match om in objMatches)
+                            qp.completedObjectives.Add(om.Groups[1].Value);
+
+                        active.Add(qp);
+                    }
+                }
+
+                callback?.Invoke(active, completed, destroyed);
+            }
+            else
+            {
+                callback?.Invoke(new List<QuestManager.QuestProgress>(), new List<string>(), new List<string>());
+            }
+        }
+    }
+
+
+
+    // ====================== LƯU VỊ TRÍ NPC KHI HOÀN THÀNH QUEST ======================
+
+    public void SaveNPCPosition(string wallet, string npcID, Vector3 position)
+    {
+        StartCoroutine(PatchNPCPosition(wallet, npcID, position));
+    }
+
+    IEnumerator PatchNPCPosition(string wallet, string npcID, Vector3 pos)
+    {
+        string cleanWallet = wallet.Trim();
+
+        string url =
+            $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}" +
+            "?updateMask.fieldPaths=npcPositions";
+
+        string posStr =
+            pos.x.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) + "," +
+            pos.y.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) + "," +
+            pos.z.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+
+        string json =
+        "{" +
+            "\"fields\":{" +
+                "\"npcPositions\":{" +
+                    "\"mapValue\":{" +
+                        "\"fields\":{" +
+                            $"\"{npcID}\":{{\"stringValue\":\"{posStr}\"}}" +
+                        "}" +
+                    "}" +
+                "}" +
+            "}" +
+        "}";
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "PATCH"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log($"✅ Đã lưu vị trí NPC '{npcID}' = {pos}");
+            else
+                Debug.LogError("Lỗi lưu NPC: " + request.downloadHandler.text);
+        }
+    }
+
+
+    // ====================== LOAD VỊ TRÍ NPC TỪ FIREBASE ======================
+
+    public void LoadNPCPosition(string wallet, string npcID, System.Action<Vector3> callback)
+    {
+        StartCoroutine(GetNPCPosition(wallet, npcID, callback));
+    }
+
+    IEnumerator GetNPCPosition(string wallet, string npcID, System.Action<Vector3> callback)
+    {
+        string cleanWallet = wallet.Trim();
+
+        string url =
+            $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string json = request.downloadHandler.text;
+
+                // TÌM npcID TRONG npcPositions
+                string pattern =
+                    $"\"{npcID}\"\\s*:\\s*\\{{\\s*\"stringValue\"\\s*:\\s*\"([^\"]+)\"";
+
+                Match match = Regex.Match(json, pattern);
+
+                if (match.Success)
+                {
+                    string posStr = match.Groups[1].Value;
+                    string[] parts = posStr.Split(',');
+
+                    if (parts.Length == 3)
+                    {
+                        if (float.TryParse(parts[0], System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float x) &&
+                            float.TryParse(parts[1], System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float y) &&
+                            float.TryParse(parts[2], System.Globalization.NumberStyles.Float,
+                            System.Globalization.CultureInfo.InvariantCulture, out float z))
+                        {
+                            Vector3 pos = new Vector3(x, y, z);
+
+                            Debug.Log($"Load NPC '{npcID}' = {pos}");
+                            callback?.Invoke(pos);
+                            yield break;
+                        }
+                    }
+                }
+            }
+
+            Debug.LogWarning($"NPC '{npcID}' chưa có vị trí dùng mặc định");
+            callback?.Invoke(Vector3.zero);
         }
     }
 }

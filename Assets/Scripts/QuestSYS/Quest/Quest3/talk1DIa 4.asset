@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 882732a6e728f554e9774f962e7efa63, type: 3}
+  m_Name: talk1DIa 4
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
+  lines:
+  - speaker: {fileID: 11400000, guid: fb66434008672824fa208edb7640cc6e, type: 2}
+    text: "\u0110\xF3 l\xE0 do Dunge \u0111\xE3 s\u1ED1ng d\u1EADy. C\xE1c hi\u1EC7p
+      s\u0129 c\u0169 \u0111\xE3 \u0111\u1EBFn \u0111\xF3, \u0111\u1EBFn nay ch\u01B0a
+      c\xF3 tung t\xEDch g\xEC."

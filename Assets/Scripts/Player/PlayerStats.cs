@@ -98,11 +98,13 @@ public class PlayerStats : MonoBehaviour
     public void AddExp(int amount)
     {
         currentExp += amount;
-        if (currentExp >= requiredExp)
+        while (currentExp >= requiredExp)
         {
+            currentExp -= requiredExp;
             level++;
             UpdateStatsFromCSV(level);
             Debug.Log("Level Up: " + level);
+            
         }
         SaveData();
     }

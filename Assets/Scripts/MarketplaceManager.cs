@@ -13,6 +13,7 @@ public class MarketplaceManager : MonoBehaviour
     public ItemDatabase database;
     public GameObject shop;
     public TextMeshProUGUI walletText;
+    public CanvasGroup canvasGroup;
 
     bool isShopOpen = false;
 
@@ -28,11 +29,18 @@ public class MarketplaceManager : MonoBehaviour
 
     public void OpenShop()
     {
-        shop.SetActive(true);
+        canvasGroup.alpha = 1;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         StartCoroutine(LoadMarketplace());
     }
 
-    public void CloseShop() => shop.SetActive(false);
+    public void CloseShop()
+    {
+        canvasGroup.alpha = 0;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+    }
 
     IEnumerator LoadMarketplace()
     {

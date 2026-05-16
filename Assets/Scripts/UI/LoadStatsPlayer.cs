@@ -13,17 +13,21 @@ public class LoadStatsPlayer : MonoBehaviour
     private void Awake()
     {
         if(instance == null)
+        {
             instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+           
+        else
+        {
+            Destroy(gameObject);
+        }
         StartCoroutine(WaitForPlayerStats());
     }
 
     private void Start()
     {
-        clear();
-        lv.text += "Level: " + PlayerStats.Instance.level;
-        STR.text += "STR: "+ PlayerStats.Instance.strength;
-        DEF.text += "DEF: " + PlayerStats.Instance.defense;
-        Mana.text += "Mana: " + PlayerStats.Instance.maxMana;
+       
     }
     IEnumerator WaitForPlayerStats()
     {
@@ -31,6 +35,10 @@ public class LoadStatsPlayer : MonoBehaviour
         {
             yield return null;
         }
+        lv.text = "Level: " + PlayerStats.Instance.level;
+        STR.text = "STR: " + PlayerStats.Instance.strength;
+        DEF.text = "DEF: " + PlayerStats.Instance.defense;
+        Mana.text = "Mana: " + PlayerStats.Instance.maxMana;
     }
         void clear()
     {

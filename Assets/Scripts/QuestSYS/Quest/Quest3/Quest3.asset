@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b8e74b4d34b94b4a9b9f0ed5695e416, type: 3}
+  m_Name: Quest3
+  m_EditorClassIdentifier: Assembly-CSharp::QuestSO
+  questID: Quest3
+  title: "\u0110\xE1nh b\u1EA1i Minator"
+  description: "\u0110\xE1nh b\u1EA1i Minator"
+  objectives:
+  - {fileID: 11400000, guid: d62abcac069fc9f4ea18bb3c06272cea, type: 2}
+  - {fileID: 11400000, guid: b9675cadbd5b5f943b86de5136985bb7, type: 2}
+  - {fileID: 11400000, guid: 193de8565edfc5848a6b366df877d9e9, type: 2}
+  reward:
+    gold: 100
+    exp: 200
+  prerequisiteQuest: {fileID: 0}
+  isRepeatable: 0
+  dialogueAfterCompleted: {fileID: 11400000, guid: 8eef136c798106949acea4bb08860058, type: 2}

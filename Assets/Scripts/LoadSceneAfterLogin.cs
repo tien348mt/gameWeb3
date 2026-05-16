@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class LoadSceneAfterLogin : MonoBehaviour
 {
@@ -20,5 +21,16 @@ public class LoadSceneAfterLogin : MonoBehaviour
     public void LoadNextScene()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene("GamePlay");
+        StartCoroutine(WaitAndLoadQuests());
+    }
+    IEnumerator WaitAndLoadQuests()
+    {
+        yield return new WaitForSeconds(0.8f);
+        string wallet = ShowWalletAddress.Instance.walletText.text;
+
+        if (!string.IsNullOrEmpty(wallet))
+        {
+            FirestoreManager.Instance.LoadPlayerQuests(wallet, QuestManager.Instance.LoadAllProgress);
+        }
     }
 }

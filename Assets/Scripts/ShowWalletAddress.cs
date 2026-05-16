@@ -4,9 +4,19 @@ using Thirdweb;
 
 public class ShowWalletAddress : MonoBehaviour
 {
+    public static ShowWalletAddress Instance;
     public TMP_Text walletText;
 
-    async void Start()
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else Destroy(gameObject);
+    }
+        async void Start()
     {
        ShowAddress();
     }

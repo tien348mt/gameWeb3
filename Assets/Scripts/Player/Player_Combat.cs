@@ -4,6 +4,8 @@ public class Player_Combat : MonoBehaviour
 {
     public Animator animator;
     [SerializeField] private float cooldownAttack = 2f;
+    public PlayerDamage playerDamage;
+    public GameObject slash;
     private float timer;
     private void Update()
     {
@@ -28,5 +30,16 @@ public class Player_Combat : MonoBehaviour
     public void finishAttack()
     {
         animator.SetBool("isAttacking", false);
+    }
+
+    public void EnableSlash()
+    {
+        slash.SetActive(true);
+        playerDamage.DoDamage();
+    }
+
+    public void DisableSlash()
+    {
+        slash.SetActive(false);
     }
 }

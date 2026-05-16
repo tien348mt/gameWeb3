@@ -34,8 +34,8 @@ public class Web3Manager : MonoBehaviour
 
     private void ShowError(string msg)
     {
-        if (error != null) error.text = msg;
-        Debug.LogError(msg);
+       /* if (error != null) error.text = msg;
+        Debug.LogError(msg);*/
     }
 
     // ================= MINT =================

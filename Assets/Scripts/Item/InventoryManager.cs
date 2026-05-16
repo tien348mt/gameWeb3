@@ -9,18 +9,18 @@ public class InventoryManager : MonoBehaviour
     public string projectId = "gamelord1-49c71";
     public GameObject slotPrefab;
     public Transform contentParent;
-    public GameObject inventory;
+    public CanvasGroup canvasGroup;
     public ItemDatabase database;
     public TextMeshProUGUI walletText;
 
     bool isInventoryOpen = false;
     public static InventoryManager Instance;
 
-    void Awake() { Instance = this; }
+    /*void Awake() { Instance = this; }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.B))
         {
             isInventoryOpen = !isInventoryOpen;
             if (isInventoryOpen) OpenInventory();
@@ -35,13 +35,92 @@ public class InventoryManager : MonoBehaviour
         string wallet = walletText.text.Trim();
         if (string.IsNullOrEmpty(wallet) || wallet.Length < 10) return;
 
-        inventory.SetActive(true);
+        canvasGroup.alpha = 1;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
         foreach (Transform child in contentParent) Destroy(child.gameObject);
         StartCoroutine(GetItems(wallet));
     }
 
-    public void CloseInventory() { inventory.SetActive(false); isInventoryOpen = false; }
+    public void CloseInventory()
+    {
+        canvasGroup.alpha = 0;
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false; 
+        isInventoryOpen = false; 
+    }*/
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
+    void Update()
+    {
+        // Phím B để mở/đóng (giữ nguyên)
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            ToggleInventory();
+        }
+    }
+
+    // ====================== TOGGLE INVENTORY (NÚT BUTTON SẼ GỌI HÀM NÀY) ======================
+    public void ToggleInventory()
+    {
+        isInventoryOpen = !isInventoryOpen;
+
+        if (isInventoryOpen)
+            OpenInventory();
+        else
+            CloseInventory();
+    }
+
+    public void OpenInventory()
+    {
+        Debug.Log("=== OpenInventory() được gọi ===");
+
+        if (canvasGroup == null)
+        {
+            Debug.LogError("❌ CanvasGroup chưa được gán trong InventoryManager!");
+            return;
+        }
+
+        canvasGroup.alpha = 1;
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
+
+        // Xóa slot cũ
+        foreach (Transform child in contentParent)
+            Destroy(child.gameObject);
+
+        // Nếu chưa có wallet thì vẫn mở để test
+        string wallet = (walletText != null) ? walletText.text.Trim() : "";
+        if (string.IsNullOrEmpty(wallet) || wallet.Length < 10)
+        {
+            Debug.LogWarning("⚠️ Wallet chưa có hoặc chưa connect, vẫn mở inventory để test");
+        }
+
+        StartCoroutine(GetItems(wallet));
+        Debug.Log("✅ Inventory UI đã mở");
+    }
+
+    public void CloseInventory()
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
+        }
+        isInventoryOpen = false;
+        Debug.Log("✅ Inventory UI đã đóng");
+    }
     IEnumerator GetItems(string wallet)
     {
         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{wallet}/Inventory";
