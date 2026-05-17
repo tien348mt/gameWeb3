@@ -107,6 +107,8 @@ public class InventorySlotUI : MonoBehaviour
 
     public void Equided()
     {
+        string myWallet = walletText.text.Trim();
+        if (string.IsNullOrEmpty(myWallet) || myWallet.Length < 10) return;
         PlayerStats.Instance.strength += float.Parse(currentItem.attack);
         PlayerStats.Instance.maxHp += float.Parse(currentItem.hp);
         PlayerStats.Instance.currentHp += float.Parse(currentItem.hp);
@@ -114,6 +116,7 @@ public class InventorySlotUI : MonoBehaviour
         PlayerStats.Instance.currentMana += float.Parse(currentItem.mana);
         PlayerStats.Instance.defense += float.Parse(currentItem.armor);
         PlayerStats.Instance.SaveData();
+        Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.DeleteItemFromFirebase(myWallet, documentId, this.gameObject));
         btnEquid.interactable = false;
     }
 }

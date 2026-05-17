@@ -19,7 +19,7 @@ public class NormalEnemy : BaseEnemy
 
     protected override void OnDeath()
     {
-        PlayerStats.Instance.currentExp += exp;
+        PlayerStats.Instance.AddExp(exp);
         GetComponent<EnemyDropper>()?.Drop(transform.position);
         Debug.Log($"💀 NormalEnemy chết: {gameObject.name}");
         // TODO: drop item, spawn effect, v.v.

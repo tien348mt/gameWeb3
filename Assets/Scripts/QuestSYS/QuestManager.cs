@@ -29,6 +29,9 @@ public class QuestManager : MonoBehaviour
         foreach (var data in activeData)
             activeQuests.Add(new ActiveQuest(data));
         IsLoaded = true;
+
+        foreach (var a in FindObjectsOfType<QuestObjectActivator>(true))
+            a.CheckAndActivate();
     }
 
     public void AcceptQuest(QuestSO quest)
@@ -57,7 +60,11 @@ public class QuestManager : MonoBehaviour
             GiveReward(questID);      
 
             SaveToFirebase();
-            Debug.Log($"🏆 Quest {questID} HOÀN THÀNH TOÀN BỘ → Nhận thưởng!");
+            Debug.Log($"🏆 Quest {questID} HOÀN THÀNH TOÀN BỘ → Nhận thưởng!"); 
+
+            foreach (var a in FindObjectsOfType<QuestObjectActivator>(true))
+                a.CheckAndActivate();
+
         }
         else
         {

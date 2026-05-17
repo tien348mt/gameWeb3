@@ -42,7 +42,7 @@ public class PlayerHealth : MonoBehaviour
             yield return new WaitForSeconds(2f);
 
             // healAmount là int (không còn float)
-            int healAmount = Mathf.FloorToInt(PlayerStats.Instance.currentHp / 100f);
+            int healAmount = Mathf.Max(Mathf.FloorToInt(PlayerStats.Instance.currentHp / 100f),4);
 
             PlayerStats.Instance.currentHp = Mathf.Min(
                 PlayerStats.Instance.currentHp + healAmount,
