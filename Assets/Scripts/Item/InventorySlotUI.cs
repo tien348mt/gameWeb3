@@ -13,9 +13,10 @@ public class InventorySlotUI : MonoBehaviour
     public Text buttonText;
     public TextMeshProUGUI walletText;
     public TextMeshProUGUI error;
+    public GameObject showData;
 
     [Header("Item Data")]
-    private ItemData currentItem;
+    public ItemData currentItem;
     private string documentId;
     private bool isMinted = false;
 
@@ -118,5 +119,15 @@ public class InventorySlotUI : MonoBehaviour
         PlayerStats.Instance.SaveData();
         Web3Manager.Instance.StartCoroutine(Web3Manager.Instance.DeleteItemFromFirebase(myWallet, documentId, this.gameObject));
         btnEquid.interactable = false;
+    }
+
+    public void ShowDataItem()
+    {
+        GameObject instance = Instantiate(showData);
+        DataItemUI dataUI = instance.GetComponent<DataItemUI>();
+        if (dataUI != null)
+        {
+            dataUI.SetValueData(currentItem); // truyền thẳng item vào
+        }
     }
 }

@@ -372,6 +372,10 @@ MonoBehaviour:
   activeQuests: []
   completedQuests: []
   permanentlyDestroyedObjects: []
+  allQuests:
+  - {fileID: 11400000, guid: 8365286a2a09af646a4bea94656697a5, type: 2}
+  - {fileID: 11400000, guid: 4134791cf89196344b2c008cb33ccdab, type: 2}
+  - {fileID: 11400000, guid: ed8b52461b5e0fe47b9598f4622d7aa9, type: 2}
 --- !u!4 &971326755
 Transform:
   m_ObjectHideFlags: 0

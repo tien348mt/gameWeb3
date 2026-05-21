@@ -24,6 +24,12 @@ public class PlayerStats : MonoBehaviour
     public float currentSTR;
     public float currentDEF;
 
+    [Header("Currency")]
+    public int coin = 0;
+
+    [SerializeField] private RespawnManager respawnManager;
+
+   
     private void Awake()
     {
         if (Instance == null)
@@ -46,7 +52,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Update()
     {
-       
+        
     }
     public void LoadPlayerData()
     {
@@ -65,6 +71,8 @@ public class PlayerStats : MonoBehaviour
                 this.maxHp = maxHP;
                 this.maxMana = maxMana;
             });
+
+            db.LoadCoin(walletAddress, (c) => { this.coin = c; CoinUI.Instance.UpdateUI(); });
         }
     }
 
@@ -108,7 +116,12 @@ public class PlayerStats : MonoBehaviour
         }
         SaveData();
     }
-
+    public void AddCoin(int amount)
+    {
+        coin += amount;
+        CoinUI.Instance.UpdateUI();
+        SaveData();
+    }
     public void SaveData()
     {
         FirestoreManager db = FindObjectOfType<FirestoreManager>();
@@ -117,7 +130,15 @@ public class PlayerStats : MonoBehaviour
             db.SavePlayerStats(walletAddress, level, currentExp, currentHp, currentMana, strength, defense, maxHp, maxMana, transform.position);
             LoadStatsPlayer.instance.Information();
             PlayerHealth.instance.UplevelInformationUI();
-            
+            db.SaveCoin(walletAddress, coin);
+        }
+    }
+
+    public void PlayerDead()
+    {
+        if(currentHp <= 0)
+        {
+            respawnManager.Respawn();
         }
     }
 

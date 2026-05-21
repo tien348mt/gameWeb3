@@ -10,6 +10,11 @@ public class QuestManager : MonoBehaviour
     public List<string> permanentlyDestroyedObjects = new List<string>();
     public bool IsLoaded { get; private set; } = false;
 
+    [Header("=== Quest Database ===")]
+    public List<QuestSO> allQuests; // kéo tất cả QuestSO vào đây trong Inspector
+
+    private Dictionary<string, QuestSO> questSOCache = new Dictionary<string, QuestSO>();
+
     private void Awake()
     {
         if (Instance == null)
@@ -18,7 +23,13 @@ public class QuestManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
+
+        // Build cache từ list kéo tay
+        foreach (var q in allQuests)
+            if (q != null && !questSOCache.ContainsKey(q.questID))
+                questSOCache[q.questID] = q;
     }
+
     // ====================== LOAD TỪ FIREBASE ======================
     public void LoadAllProgress(List<QuestProgress> activeData, List<string> completedData, List<string> destroyedData)
     {
@@ -27,7 +38,23 @@ public class QuestManager : MonoBehaviour
 
         activeQuests.Clear();
         foreach (var data in activeData)
-            activeQuests.Add(new ActiveQuest(data));
+        {
+            // ── FIX BUG 1: restore đầy đủ objectives từ QuestSO ──
+            if (questSOCache.TryGetValue(data.questID, out QuestSO so))
+            {
+                var quest = new ActiveQuest(so);
+                // Đánh dấu lại objectives đã hoàn thành
+                foreach (var obj in quest.objectives)
+                    if (data.completedObjectives.Contains(obj.description))
+                        obj.isCompleted = true;
+                activeQuests.Add(quest);
+            }
+            else
+            {
+                Debug.LogWarning($"[QuestManager] Không tìm thấy QuestSO cho questID: {data.questID}");
+            }
+        }
+
         IsLoaded = true;
 
         foreach (var a in FindObjectsOfType<QuestObjectActivator>(true))
@@ -37,7 +64,25 @@ public class QuestManager : MonoBehaviour
     public void AcceptQuest(QuestSO quest)
     {
         if (completedQuests.Contains(quest.questID) && !quest.isRepeatable) return;
-        activeQuests.Add(new ActiveQuest(quest));
+        if (activeQuests.Exists(q => q.questID == quest.questID)) return; // tránh nhận trùng
+
+        var newQuest = new ActiveQuest(quest);
+
+        // ── FIX BUG 2: nếu đã kill enemy trước khi nhận quest, tính luôn ──
+        foreach (var obj in newQuest.objectives)
+        {
+            if (obj is KillObjective k)
+            {
+                foreach (var destroyedID in permanentlyDestroyedObjects)
+                    if (k.targetEnemyInstanceID == destroyedID)
+                    {
+                        k.currentAmount++;
+                        if (k.CheckCompletion()) obj.isCompleted = true;
+                    }
+            }
+        }
+
+        activeQuests.Add(newQuest);
         SaveToFirebase();
     }
 
@@ -47,71 +92,54 @@ public class QuestManager : MonoBehaviour
         var quest = activeQuests.Find(q => q.questID == questID);
         if (quest == null) return;
 
-        // Đánh dấu objective vừa hoàn thành
         var obj = quest.objectives.Find(o => o.description == objectiveDesc);
         if (obj != null) obj.isCompleted = true;
 
-        // KIỂM TRA XEM QUEST ĐÃ HOÀN THÀNH TẤT CẢ ELEMENT CHƯA
         if (quest.IsCompleted())
         {
             completedQuests.Add(quest.questID);
             activeQuests.Remove(quest);
-
-            GiveReward(questID);      
-
+            GiveReward(questID);
             SaveToFirebase();
-            Debug.Log($"🏆 Quest {questID} HOÀN THÀNH TOÀN BỘ → Nhận thưởng!"); 
+            Debug.Log($"🏆 Quest {questID} HOÀN THÀNH TOÀN BỘ → Nhận thưởng!");
 
             foreach (var a in FindObjectsOfType<QuestObjectActivator>(true))
                 a.CheckAndActivate();
-
         }
         else
         {
             SaveToFirebase();
-            Debug.Log($"📌 Quest {questID} còn objective chưa hoàn thành, chưa nhận thưởng.");
+            Debug.Log($"📌 Quest {questID} còn objective chưa hoàn thành.");
         }
     }
 
     // ====================== NHẬN THƯỞNG ======================
     private void GiveReward(string questID)
     {
-        QuestSO questSO = null;
+        Debug.Log($"[GiveReward] Cache có {questSOCache.Count} quest: {string.Join(", ", questSOCache.Keys)}");
 
-        // Tìm trong TẤT CẢ NPC_QuestGiver (fix cho nhiều NPC)
-        NPC_QuestGiver[] allGivers = FindObjectsOfType<NPC_QuestGiver>();
+        QuestSO questSO = questSOCache.TryGetValue(questID, out var so) ? so : null;
 
-        foreach (var giver in allGivers)
+        if (questSO == null)
         {
-            foreach (var q in giver.questsToGive)
-            {
-                if (q != null && q.questID == questID)
-                {
-                    questSO = q;
-                    Debug.Log($"✅ Tìm thấy QuestSO cho quest {questID} từ NPC {giver.npcID}");
-                    break;
-                }
-            }
-            if (questSO != null) break;
-        }
-
-        if (questSO == null || questSO.reward == null)
-        {
-            Debug.LogWarning($"⚠️ Không tìm thấy QuestSO hoặc reward cho quest {questID}");
+            Debug.LogWarning($"[GiveReward] ❌ Không tìm thấy QuestSO cho '{questID}' trong cache");
             return;
         }
-        int gold = questSO.reward.gold;
-        int exp = questSO.reward.exp;
+        if (questSO.reward == null)
+        {
+            Debug.LogWarning($"[GiveReward] ❌ QuestSO '{questID}' không có reward");
+            return;
+        }
 
-        Debug.Log($"🎁 Nhận thưởng: +{gold} Gold, +{exp} Exp");
+        Debug.Log($"🎁 Nhận thưởng: +{questSO.reward.gold} Gold, +{questSO.reward.exp} Exp");
 
         string wallet = ShowWalletAddress.Instance?.walletText?.text ?? "";
         if (!string.IsNullOrEmpty(wallet))
         {
-            PlayerStats.Instance.AddExp(exp);
-
-            // PlayerStats.Instance.AddGold(gold);
+            PlayerStats.Instance.AddExp(questSO.reward.exp);
+            PlayerStats.Instance.AddCoin(questSO.reward.gold);
         }
+           
     }
 
     // ====================== NOTIFY ======================
@@ -159,6 +187,7 @@ public class QuestManager : MonoBehaviour
                     if (k.CheckCompletion()) CompleteObjective(quest.questID, obj.description);
                     return;
                 }
+
         SaveToFirebase();
     }
 
@@ -187,19 +216,18 @@ public class QuestManager : MonoBehaviour
 
     private List<QuestProgress> GetActiveForSave()
     {
-        List<QuestProgress> list = new List<QuestProgress>();
+        var list = new List<QuestProgress>();
         foreach (var q in activeQuests)
-        {
             list.Add(new QuestProgress
             {
                 questID = q.questID,
                 completedObjectives = q.GetCompletedNames(),
                 isCompleted = q.IsCompleted()
             });
-        }
         return list;
     }
 
+    // ====================== INNER CLASSES ======================
     [System.Serializable]
     public class ActiveQuest
     {
@@ -215,16 +243,11 @@ public class QuestManager : MonoBehaviour
                 objectives.Add(Instantiate(o));
         }
 
-        public ActiveQuest(QuestProgress data)
-        {
-            questID = data.questID;
-        }
-
         public bool IsCompleted() => objectives.TrueForAll(o => o.isCompleted);
 
         public List<string> GetCompletedNames()
         {
-            List<string> list = new List<string>();
+            var list = new List<string>();
             foreach (var o in objectives)
                 if (o.isCompleted) list.Add(o.description);
             return list;

@@ -522,4 +522,64 @@ public class FirestoreManager : MonoBehaviour
             callback?.Invoke(Vector3.zero);
         }
     }
+
+
+    // ====================== COIN ======================
+
+    public void SaveCoin(string wallet, int coin)
+    {
+        StartCoroutine(PatchCoinToFirestore(wallet, coin));
+    }
+
+    IEnumerator PatchCoinToFirestore(string wallet, int coin)
+    {
+        string cleanWallet = wallet.Trim();
+        string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}?updateMask.fieldPaths=coin";
+
+        string json = "{\"fields\": {\"coin\": {\"integerValue\": \"" + coin + "\"}}}";
+
+        using (UnityWebRequest request = new UnityWebRequest(url, "PATCH"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+                Debug.Log($"✅ Đã lưu coin: {coin}");
+            else
+                Debug.LogError("Lỗi lưu coin: " + request.downloadHandler.text);
+        }
+    }
+
+    public void LoadCoin(string wallet, System.Action<int> callback)
+    {
+        StartCoroutine(GetCoinFromFirestore(wallet, callback));
+    }
+
+    IEnumerator GetCoinFromFirestore(string wallet, System.Action<int> callback)
+    {
+        string cleanWallet = wallet.Trim();
+        string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
+
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            int coin = 0;
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                string text = request.downloadHandler.text;
+                string coinStr = ExtractValue(text, "coin", "integerValue");
+                if (!string.IsNullOrEmpty(coinStr))
+                    int.TryParse(coinStr, out coin);
+            }
+
+            Debug.Log($"✅ Load coin: {coin}");
+            callback?.Invoke(coin);
+        }
+    }
 }

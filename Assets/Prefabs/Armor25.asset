@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bdc0b0f5465d6443a88fa3c2ca37e85, type: 3}
+  m_Name: Armor25
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemId: Armor25
+  itemName: Armor25
+  itemIcon: {fileID: 6894999169920593895, guid: e5d12a2609b91274b891b4453d1b98d9, type: 3}
+  metadataUri: 
+  basePrice: 0.001
+  armor: 100
+  attack: 100
+  hp: 100
+  mana: 100

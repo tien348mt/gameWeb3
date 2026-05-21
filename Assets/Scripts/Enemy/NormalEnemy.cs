@@ -11,6 +11,7 @@ public class NormalEnemy : BaseEnemy
     [SerializeField] private float attackCooldown = 1.5f;
     [SerializeField] private float defense = 0f;
     [SerializeField] private int exp = 10;
+    [SerializeField] private int coin = 10;
 
     protected override int MaxHealth => maxHealth;
     protected override float AttackDamage => attackDamage;
@@ -20,6 +21,7 @@ public class NormalEnemy : BaseEnemy
     protected override void OnDeath()
     {
         PlayerStats.Instance.AddExp(exp);
+        PlayerStats.Instance.AddCoin(coin);
         GetComponent<EnemyDropper>()?.Drop(transform.position);
         Debug.Log($"💀 NormalEnemy chết: {gameObject.name}");
         // TODO: drop item, spawn effect, v.v.

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 
 /// <summary>
 /// Base class chứa toàn bộ AI, di chuyển, animation.
@@ -36,6 +37,13 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
     private bool isDead = false;
     private bool isAttacking = false;
     private Vector2 lastAttackPosition;
+
+
+    [Header("=== HP Bar ===")]
+    [SerializeField] private Transform hpBarFill;
+    private float _hpBarFullScaleX;
+    
+
     private enum AIState
     {
         Idle,
@@ -65,6 +73,8 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
             if (go != null)
                 player = go.transform;
         }
+        if (hpBarFill != null)
+            _hpBarFullScaleX = hpBarFill.localScale.x;
     }
 
     void Update()
@@ -192,6 +202,10 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
         DealDamage();
         isAttacking = false;
     }
+    public void AttackLT()
+    {
+        DealDamage();
+    }
 
     // ════════════════════════════════════════════════════════
     //  IDamageable / IKillable
@@ -209,12 +223,23 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
 
         currentHealth -= finalDamage;
 
+        UpdateHPBar();
+
         Debug.Log(
             $"[{gameObject.name}] nhận {finalDamage} dame (def {Defense}%), còn {currentHealth}/{MaxHealth}"
         );
 
         if (currentHealth <= 0)
             Die();
+    }
+
+    private void UpdateHPBar()
+    {
+        if (hpBarFill == null) return;
+
+        float ratio = Mathf.Clamp01((float)currentHealth / MaxHealth); // ← Clamp01 giới hạn 0~1
+        DOTween.Kill(hpBarFill);
+        hpBarFill.DOScaleX(_hpBarFullScaleX * ratio, 0.3f).SetEase(Ease.OutCubic);
     }
 
     public void Die()
