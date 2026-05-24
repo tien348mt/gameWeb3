@@ -36,7 +36,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 93, y: -13.9}
+  m_AnchoredPosition: {x: 93, y: -15.8}
   m_SizeDelta: {x: 58.873703, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5305264107986542182
@@ -67,8 +67,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 5670534119694579364, guid: 9bdf5fae362d38343800b721dae136bb, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -199,8 +199,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 18
+    m_Font: {fileID: 12800000, guid: 4dd7ee8555a451941b2b021129716b3b, type: 3}
+    m_FontSize: 14
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 0
@@ -311,6 +311,7 @@ MonoBehaviour:
   walletText: {fileID: 891579743842812031, guid: 010ba813fe2a7f044a587a9eba3b9444, type: 3}
   error: {fileID: 6279855900833630869, guid: d642df0714d638f4c99e883b71643d85, type: 3}
   showData: {fileID: 3082848080082046092, guid: f6abaffcab8f3dc42b55133d281c1fbb, type: 3}
+  currentItem: {fileID: 0}
 --- !u!114 &2920959049127138602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,7 +434,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: 4dd7ee8555a451941b2b021129716b3b, type: 3}
     m_FontSize: 18
     m_FontStyle: 1
     m_BestFit: 0
@@ -561,7 +562,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 93, y: 13.5}
+  m_AnchoredPosition: {x: 93, y: 18.3}
   m_SizeDelta: {x: 58.873703, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3134270495902660568
@@ -592,8 +593,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 5670534119694579364, guid: 9bdf5fae362d38343800b721dae136bb, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

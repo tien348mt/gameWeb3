@@ -320,99 +320,189 @@ public class FirestoreManager : MonoBehaviour
         StartCoroutine(GetQuestsFromFirestore(wallet, callback));
     }
 
+    /* IEnumerator GetQuestsFromFirestore(string wallet, OnQuestsLoaded callback)
+     {
+         string cleanWallet = wallet.Trim();
+
+         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
+
+         using (UnityWebRequest request = UnityWebRequest.Get(url))
+         {
+             yield return request.SendWebRequest();
+
+             if (request.result == UnityWebRequest.Result.Success)
+             {
+                 string text = request.downloadHandler.text;
+
+                 List<QuestManager.QuestProgress> active = new List<QuestManager.QuestProgress>();
+                 List<string> completed = new List<string>();
+                 List<string> destroyed = new List<string>();
+
+                 Match compMatch = Regex.Match(
+                     text,
+                     @"""completedQuests""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
+                     RegexOptions.Singleline);
+
+                 if (compMatch.Success)
+                 {
+                     MatchCollection ids = Regex.Matches(
+                         compMatch.Groups[1].Value,
+                         @"""stringValue""\s*:\s*""([^""]+)""");
+
+                     foreach (Match m in ids)
+                         completed.Add(m.Groups[1].Value);
+                 }
+
+                 Match destMatch = Regex.Match(
+                     text,
+                     @"""permanentlyDestroyedObjects""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
+                     RegexOptions.Singleline);
+
+                 if (destMatch.Success)
+                 {
+                     MatchCollection ids = Regex.Matches(
+                         destMatch.Groups[1].Value,
+                         @"""stringValue""\s*:\s*""([^""]+)""");
+
+                     foreach (Match m in ids)
+                         destroyed.Add(m.Groups[1].Value);
+                 }
+
+                 Match activeMatch = Regex.Match(
+                     text,
+                     @"""activeQuests""\s*:\s*\{[^}]*""fields""\s*:\s*\{(.*?)\}\s*\}",
+                     RegexOptions.Singleline);
+
+                 if (activeMatch.Success)
+                 {
+                     string fieldsStr = activeMatch.Groups[1].Value;
+
+                     MatchCollection questMatches = Regex.Matches(
+                         fieldsStr,
+                         @"""([^""]+)""\s*:\s*\{[^}]*completedObjectives[^[]*\[(.*?)\][^}]*booleanValue""\s*:\s*(true|false)",
+                         RegexOptions.Singleline);
+
+                     foreach (Match m in questMatches)
+                     {
+                         QuestManager.QuestProgress qp = new QuestManager.QuestProgress
+                         {
+                             questID = m.Groups[1].Value,
+                             isCompleted = m.Groups[3].Value.ToLower() == "true"
+                         };
+
+                         string objStr = m.Groups[2].Value;
+
+                         MatchCollection objMatches = Regex.Matches(
+                             objStr,
+                             @"""stringValue""\s*:\s*""([^""]+)""");
+
+                         foreach (Match om in objMatches)
+                             qp.completedObjectives.Add(om.Groups[1].Value);
+
+                         active.Add(qp);
+                     }
+                 }
+
+                 callback?.Invoke(active, completed, destroyed);
+             }
+             else
+             {
+                 callback?.Invoke(new List<QuestManager.QuestProgress>(), new List<string>(), new List<string>());
+             }
+         }
+     }*/
+
+    // Thay toàn bộ IEnumerator GetQuestsFromFirestore bằng cái này
+
     IEnumerator GetQuestsFromFirestore(string wallet, OnQuestsLoaded callback)
     {
         string cleanWallet = wallet.Trim();
-
         string url = $"https://firestore.googleapis.com/v1/projects/{projectId}/databases/(default)/documents/Users/{cleanWallet}";
 
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             yield return request.SendWebRequest();
 
-            if (request.result == UnityWebRequest.Result.Success)
+            List<QuestManager.QuestProgress> active = new List<QuestManager.QuestProgress>();
+            List<string> completed = new List<string>();
+            List<string> destroyed = new List<string>();
+
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                string text = request.downloadHandler.text;
+                callback?.Invoke(active, completed, destroyed);
+                yield break;
+            }
 
-                List<QuestManager.QuestProgress> active = new List<QuestManager.QuestProgress>();
-                List<string> completed = new List<string>();
-                List<string> destroyed = new List<string>();
+            string text = request.downloadHandler.text;
 
-                Match compMatch = Regex.Match(
-                    text,
-                    @"""completedQuests""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
+            // ── completedQuests ──────────────────────────────────
+            Match compMatch = Regex.Match(text,
+                @"""completedQuests""\s*:\s*\{.*?""values""\s*:\s*\[(.*?)\]",
+                RegexOptions.Singleline);
+
+            if (compMatch.Success)
+                foreach (Match m in Regex.Matches(compMatch.Groups[1].Value,
+                    @"""stringValue""\s*:\s*""([^""]+)"""))
+                    completed.Add(m.Groups[1].Value);
+
+            // ── permanentlyDestroyedObjects ──────────────────────
+            Match destMatch = Regex.Match(text,
+                @"""permanentlyDestroyedObjects""\s*:\s*\{.*?""values""\s*:\s*\[(.*?)\]",
+                RegexOptions.Singleline);
+
+            if (destMatch.Success)
+                foreach (Match m in Regex.Matches(destMatch.Groups[1].Value,
+                    @"""stringValue""\s*:\s*""([^""]+)"""))
+                    destroyed.Add(m.Groups[1].Value);
+
+            // ── activeQuests ─────────────────────────────────────
+            // Tìm từng questID bên trong activeQuests.mapValue.fields
+            Match activeBlock = Regex.Match(text,
+                @"""activeQuests""\s*:\s*\{.*?""mapValue""\s*:\s*\{.*?""fields""\s*:\s*\{(.*)\}\s*\}\s*\}",
+                RegexOptions.Singleline);
+
+            if (activeBlock.Success)
+            {
+                string fieldsStr = activeBlock.Groups[1].Value;
+
+                // Tìm từng quest block: "questID": { mapValue: { fields: { ... } } }
+                MatchCollection questBlocks = Regex.Matches(fieldsStr,
+                    @"""([^""]+)""\s*:\s*\{.*?""mapValue""\s*:\s*\{.*?""fields""\s*:\s*\{(.*?)\}\s*\}\s*\}",
                     RegexOptions.Singleline);
 
-                if (compMatch.Success)
+                foreach (Match qm in questBlocks)
                 {
-                    MatchCollection ids = Regex.Matches(
-                        compMatch.Groups[1].Value,
-                        @"""stringValue""\s*:\s*""([^""]+)""");
+                    string questID = qm.Groups[1].Value;
+                    string questField = qm.Groups[2].Value;
 
-                    foreach (Match m in ids)
-                        completed.Add(m.Groups[1].Value);
-                }
+                    var qp = new QuestManager.QuestProgress { questID = questID };
 
-                Match destMatch = Regex.Match(
-                    text,
-                    @"""permanentlyDestroyedObjects""\s*:\s*\{[^}]*""values""\s*:\s*\[(.*?)\]",
-                    RegexOptions.Singleline);
-
-                if (destMatch.Success)
-                {
-                    MatchCollection ids = Regex.Matches(
-                        destMatch.Groups[1].Value,
-                        @"""stringValue""\s*:\s*""([^""]+)""");
-
-                    foreach (Match m in ids)
-                        destroyed.Add(m.Groups[1].Value);
-                }
-
-                Match activeMatch = Regex.Match(
-                    text,
-                    @"""activeQuests""\s*:\s*\{[^}]*""fields""\s*:\s*\{(.*?)\}\s*\}",
-                    RegexOptions.Singleline);
-
-                if (activeMatch.Success)
-                {
-                    string fieldsStr = activeMatch.Groups[1].Value;
-
-                    MatchCollection questMatches = Regex.Matches(
-                        fieldsStr,
-                        @"""([^""]+)""\s*:\s*\{[^}]*completedObjectives[^[]*\[(.*?)\][^}]*booleanValue""\s*:\s*(true|false)",
+                    // completedObjectives
+                    Match objArr = Regex.Match(questField,
+                        @"""completedObjectives""\s*:\s*\{.*?""values""\s*:\s*\[(.*?)\]",
                         RegexOptions.Singleline);
 
-                    foreach (Match m in questMatches)
-                    {
-                        QuestManager.QuestProgress qp = new QuestManager.QuestProgress
-                        {
-                            questID = m.Groups[1].Value,
-                            isCompleted = m.Groups[3].Value.ToLower() == "true"
-                        };
-
-                        string objStr = m.Groups[2].Value;
-
-                        MatchCollection objMatches = Regex.Matches(
-                            objStr,
-                            @"""stringValue""\s*:\s*""([^""]+)""");
-
-                        foreach (Match om in objMatches)
+                    if (objArr.Success)
+                        foreach (Match om in Regex.Matches(objArr.Groups[1].Value,
+                            @"""stringValue""\s*:\s*""([^""]+)"""))
                             qp.completedObjectives.Add(om.Groups[1].Value);
 
-                        active.Add(qp);
-                    }
-                }
+                    // isCompleted
+                    Match isDone = Regex.Match(questField,
+                        @"""isCompleted""\s*:\s*\{.*?""booleanValue""\s*:\s*(true|false)",
+                        RegexOptions.Singleline);
 
-                callback?.Invoke(active, completed, destroyed);
+                    if (isDone.Success)
+                        qp.isCompleted = isDone.Groups[1].Value == "true";
+
+                    active.Add(qp);
+                    Debug.Log($"[Load] Quest '{questID}' — objectives: [{string.Join(", ", qp.completedObjectives)}] — done: {qp.isCompleted}");
+                }
             }
-            else
-            {
-                callback?.Invoke(new List<QuestManager.QuestProgress>(), new List<string>(), new List<string>());
-            }
+
+            callback?.Invoke(active, completed, destroyed);
         }
     }
-
-
 
     // ====================== LƯU VỊ TRÍ NPC KHI HOÀN THÀNH QUEST ======================
 

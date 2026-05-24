@@ -24,6 +24,6 @@ MonoBehaviour:
   reward:
     gold: 100
     exp: 100
-  prerequisiteQuest: {fileID: 0}
+  prerequisiteQuest: {fileID: 11400000, guid: 8365286a2a09af646a4bea94656697a5, type: 2}
   isRepeatable: 0
   dialogueAfterCompleted: {fileID: 11400000, guid: afbef703c9b436246b77a27eeeb151f2, type: 2}

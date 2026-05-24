@@ -102,7 +102,7 @@ public class QuestManager : MonoBehaviour
             GiveReward(questID);
             SaveToFirebase();
             Debug.Log($"🏆 Quest {questID} HOÀN THÀNH TOÀN BỘ → Nhận thưởng!");
-
+            FindObjectOfType<QuestUI>()?.OnQuestCompleted();
             foreach (var a in FindObjectsOfType<QuestObjectActivator>(true))
                 a.CheckAndActivate();
         }
@@ -110,6 +110,7 @@ public class QuestManager : MonoBehaviour
         {
             SaveToFirebase();
             Debug.Log($"📌 Quest {questID} còn objective chưa hoàn thành.");
+            FindObjectOfType<QuestUI>()?.OnObjectiveCompleted();
         }
     }
 
@@ -151,6 +152,7 @@ public class QuestManager : MonoBehaviour
                 {
                     obj.isCompleted = true;
                     CompleteObjective(quest.questID, obj.description);
+                    FindObjectOfType<QuestUI>()?.OnObjectiveCompleted();
                     return;
                 }
     }
@@ -169,10 +171,28 @@ public class QuestManager : MonoBehaviour
                     if (reach.reached)
                     {
                         CompleteObjective(quest.questID, obj.description);
+                        FindObjectOfType<QuestUI>()?.OnObjectiveCompleted();
                         return;
                     }
                 }
     }
+
+    /*   public void NotifyEnemyKilled(string enemyInstanceID)
+       {
+           if (permanentlyDestroyedObjects.Contains(enemyInstanceID)) return;
+           permanentlyDestroyedObjects.Add(enemyInstanceID);
+
+           foreach (var quest in activeQuests)
+               foreach (var obj in quest.objectives)
+                   if (obj is KillObjective k && k.targetEnemyInstanceID == enemyInstanceID)
+                   {
+                       k.currentAmount++;
+                       if (k.CheckCompletion()) CompleteObjective(quest.questID, obj.description);
+                       return;
+                   }
+
+           SaveToFirebase();
+       }*/
 
     public void NotifyEnemyKilled(string enemyInstanceID)
     {
@@ -184,13 +204,21 @@ public class QuestManager : MonoBehaviour
                 if (obj is KillObjective k && k.targetEnemyInstanceID == enemyInstanceID)
                 {
                     k.currentAmount++;
-                    if (k.CheckCompletion()) CompleteObjective(quest.questID, obj.description);
-                    return;
+                    if (k.CheckCompletion()) 
+                    {
+                        CompleteObjective(quest.questID, obj.description); // tự gọi UI nếu quest xong
+                        
+                    }
+                    else
+                    {
+                        SaveToFirebase();
+                        FindObjectOfType<QuestUI>()?.OnObjectiveCompleted();
+                    }
+                    return; // ← return sau khi đã xử lý UI
                 }
 
-        SaveToFirebase();
+        SaveToFirebase(); // enemy không thuộc quest nào
     }
-
     public void NotifyEscortComplete(string escortNPCID, string destinationID)
     {
         foreach (var quest in activeQuests)
@@ -260,5 +288,13 @@ public class QuestManager : MonoBehaviour
         public string questID;
         public List<string> completedObjectives = new List<string>();
         public bool isCompleted;
+    }
+
+    public void Logout()
+    {
+        if(PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.SaveData();
+        }
     }
 }

@@ -97,7 +97,7 @@ public class PlayerStats : MonoBehaviour
             this.requiredExp = data.EXP;
 
             this.currentHp = this.maxHp;
-            this.currentMana = this.maxMana;
+            //this.currentMana = this.maxMana;
             /*this.currentSTR = this.strength;
             this.currentDEF = this.defense;*/
         }

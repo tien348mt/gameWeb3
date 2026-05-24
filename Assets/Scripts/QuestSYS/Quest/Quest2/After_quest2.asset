@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   lines:
   - speaker: {fileID: 11400000, guid: 609fcc2495842074f85ce9b502e7f988, type: 2}
-    text: "C\u1EA3m \u01A1n \u0111\xE3 gi\xFAp \u0111!"
+    text: "C\u1EA3m \u01A1n \u0111\xE3 gi\xFAp \u0111\u1EE1!"

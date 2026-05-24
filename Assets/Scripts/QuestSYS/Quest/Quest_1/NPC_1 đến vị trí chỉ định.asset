@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d574bd26892e4a4e9e267da327025f3, type: 3}
   m_Name: "NPC_1 \u0111\u1EBFn v\u1ECB tr\xED ch\u1EC9 \u0111\u1ECBnh"
   m_EditorClassIdentifier: Assembly-CSharp::ReachLocationObjective
-  description: "\u0110i \u0111\u1EBFn \u0111\u1ECBa \u0111i\u1EC3m NPC1 ch\u1EC9
-    \u0111\u1ECBnh"
+  description: "\u0110i theo Anhb"
   isCompleted: 0
   targetPosition: {x: -16, y: 1, z: 0}
   radius: 4

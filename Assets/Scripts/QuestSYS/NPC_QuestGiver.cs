@@ -40,6 +40,8 @@ public class NPC_QuestGiver : MonoBehaviour
 
     public void OnPlayerTalk()
     {
+        isWaitingForAccept = false;
+        if (btnAccept != null) btnAccept.SetActive(false);
         if (QuestManager.Instance == null || questsToGive == null || questsToGive.Length == 0)
         {
             Debug.LogError("❌ QuestManager.Instance is NULL hoặc NPC chưa có quest!");
@@ -228,7 +230,7 @@ public class NPC_QuestGiver : MonoBehaviour
             DialogueManager.instance.onLastLineReached.RemoveListener(listener);
 
             isWaitingForAccept = true;
-
+            DialogueManager.instance.isWaitingForAccept = true;
             if (btnAccept != null)
             {
                 Button button = btnAccept.GetComponent<Button>();
@@ -253,7 +255,7 @@ public class NPC_QuestGiver : MonoBehaviour
     public void OnAcceptQuest()
     {
         Debug.Log("🔥 OnAcceptQuest() được gọi!");
-
+        DialogueManager.instance.isWaitingForAccept = false;
         if (currentSelectedQuest == null)
             currentSelectedQuest = GetCurrentQuestForThisNPC();
 

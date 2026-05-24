@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
@@ -13,7 +13,7 @@ public class DialogueManager : MonoBehaviour
     public TextMeshProUGUI dialogueText;
     public CanvasGroup canvasGroup;
     public bool isDialogueActive;
-
+    public bool isWaitingForAccept = false;
     public DialogueSO currentDialogue;
     private int dialogueIndex;
 
@@ -47,6 +47,7 @@ public class DialogueManager : MonoBehaviour
 
     public void AdvanceDialogue()
     {
+        if (isWaitingForAccept) return;
         dialogueIndex++;
         if (dialogueIndex < currentDialogue.lines.Length)
             ShowDialogue();
@@ -74,6 +75,7 @@ public class DialogueManager : MonoBehaviour
     public void EndDialogue()
     {
         isDialogueActive = false;
+        isWaitingForAccept = false;
         canvasGroup.alpha = 0;
         canvasGroup.interactable = false;
         canvasGroup.blocksRaycasts = false;

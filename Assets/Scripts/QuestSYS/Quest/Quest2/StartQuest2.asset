@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8776e9ac0ffaf5f4c840ce7873093adf, type: 3}
   m_Name: StartQuest2
   m_EditorClassIdentifier: Assembly-CSharp::TalkObjective
-  description: "\u0110\xE1nh b\u1EA1i qu\xE1i v\u1EADt"
+  description: "N\xF3i chuy\u1EC7n v\u1EDBi HiuTao"
   isCompleted: 0
   npcID: npc2
   dialogueToPlay:

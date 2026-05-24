@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8776e9ac0ffaf5f4c840ce7873093adf, type: 3}
   m_Name: Talk_Anhb_end
   m_EditorClassIdentifier: Assembly-CSharp::TalkObjective
-  description: "N\xF3i chuy\u1EC7n sau khi di chuy\u1EC3n \u0111\u1EBFn v\u1ECB tr\xED
-    ch\u1EC9 \u0111\u1ECBnh"
+  description: "N\xF3i chuy\u1EC7n sau khi di chuy\u1EC3n \u0111\u1EBFn l\xE0ng"
   isCompleted: 0
   npcID: npc1
   dialogueToPlay:
