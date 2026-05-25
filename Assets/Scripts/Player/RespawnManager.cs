@@ -18,7 +18,7 @@ public class RespawnManager : MonoBehaviour
         blackPanel.gameObject.SetActive(true);
         MovePlayerToNearestRespawn();
 
-        blackPanel.DOFade(0f, fadeDuration)
+        blackPanel.DOFade(0.5f, fadeDuration)
             .SetEase(Ease.InOutQuad)
             .OnComplete(() =>
             {

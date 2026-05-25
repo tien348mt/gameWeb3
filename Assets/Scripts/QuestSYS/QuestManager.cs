@@ -139,6 +139,14 @@ public class QuestManager : MonoBehaviour
         {
             PlayerStats.Instance.AddExp(questSO.reward.exp);
             PlayerStats.Instance.AddCoin(questSO.reward.gold);
+            RewardUI rewardUI = FindFirstObjectByType<RewardUI>();
+
+            if (rewardUI != null)
+            {
+                rewardUI.coin.text = "COIN: " + questSO.reward.gold.ToString();
+                rewardUI.exp.text = "EXP: " + questSO.reward.exp.ToString();
+                rewardUI.ShowReward();
+            }
         }
            
     }

@@ -35,5 +35,8 @@ public class PlayerMovement : MonoBehaviour
     {
         FacingDirection *= -1;
         transform.localScale = new Vector3(transform.localScale.x * FacingDirection, transform.localScale.y, transform.localScale.z);
+        Vector3 scale = PlayerStats.Instance.levelup.transform.localScale;
+        scale.x = Mathf.Abs(scale.x);
+        PlayerStats.Instance.levelup.transform.localScale = scale;
     }
 }

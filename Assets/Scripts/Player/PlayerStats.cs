@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Threading.Tasks;
 using System.Collections;
+using DG.Tweening;
 
 public class PlayerStats : MonoBehaviour
 {
     public static PlayerStats Instance;
+    public GameObject levelup;
 
     [Header("Player Data")]
     public string walletAddress;
@@ -48,6 +50,7 @@ public class PlayerStats : MonoBehaviour
         var address = await ThirdwebManager.Instance.SDK.wallet.GetAddress();
         walletAddress = address;
         LoadPlayerData();
+        if (levelup != null) levelup.SetActive(false);
     }
 
     private void Update()
@@ -97,7 +100,7 @@ public class PlayerStats : MonoBehaviour
             this.requiredExp = data.EXP;
 
             this.currentHp = this.maxHp;
-            //this.currentMana = this.maxMana;
+            this.currentMana = this.maxMana;
             /*this.currentSTR = this.strength;
             this.currentDEF = this.defense;*/
         }
@@ -112,9 +115,38 @@ public class PlayerStats : MonoBehaviour
             level++;
             UpdateStatsFromCSV(level);
             Debug.Log("Level Up: " + level);
-            
+            TriggerLevelUpAnimation();
+
+
         }
         SaveData();
+    }
+
+    private void TriggerLevelUpAnimation()
+    {
+        if (levelup == null) return;
+
+        levelup.transform.DOKill();
+        levelup.SetActive(true);
+
+        // Luôn giữ scale dương để không bị flip
+        levelup.transform.localScale = Vector3.zero;
+
+        Vector3 targetScale = new Vector3(0.5f, 0.5f, 0.5f);
+
+        levelup.transform
+            .DOScale(targetScale, 0.5f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() =>
+            {
+                DOVirtual.DelayedCall(0.7f, () =>
+                {
+                    levelup.transform
+                        .DOScale(Vector3.zero, 0.2f)
+                        .SetEase(Ease.InBack)
+                        .OnComplete(() => levelup.SetActive(false));
+                });
+            });
     }
     public void AddCoin(int amount)
     {
