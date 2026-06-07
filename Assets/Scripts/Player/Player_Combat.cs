@@ -13,18 +13,16 @@ public class Player_Combat : MonoBehaviour
         {
             timer -= Time.deltaTime;
         }
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(1) && timer <= 0)
         {
             Attack();
+            AudioManager.Instance.PlaySFX(0);
         }
     }
     public void Attack()
     {
-        if(timer <=0)
-        {
             animator.SetBool("isAttacking", true);
             timer = cooldownAttack;
-        }
         
     }
     public void finishAttack()

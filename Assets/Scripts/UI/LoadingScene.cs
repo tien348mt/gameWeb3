@@ -37,6 +37,7 @@ public class LoadingScene : MonoBehaviour
             {
                 canvasGroup.interactable = false;
                 canvasGroup.blocksRaycasts = false;
+                AudioManager.Instance.PlayMusic(0);
             });
     }
 }

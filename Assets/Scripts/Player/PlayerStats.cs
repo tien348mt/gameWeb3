@@ -114,10 +114,9 @@ public class PlayerStats : MonoBehaviour
             currentExp -= requiredExp;
             level++;
             UpdateStatsFromCSV(level);
+            AudioManager.Instance.PlaySFX(3);
             Debug.Log("Level Up: " + level);
             TriggerLevelUpAnimation();
-
-
         }
         SaveData();
     }

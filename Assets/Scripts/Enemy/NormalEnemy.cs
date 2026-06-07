@@ -26,4 +26,8 @@ public class NormalEnemy : BaseEnemy
         Debug.Log($"💀 NormalEnemy chết: {gameObject.name}");
         // TODO: drop item, spawn effect, v.v.
     }
+    public void SlashSFX()
+    {
+        AudioManager.Instance.PlaySFX(2);
+    }
 }

@@ -15,10 +15,13 @@ MonoBehaviour:
   questID: Quest4
   title: "\u0110\xE1nh b\u1EA1i Evil"
   description: "\u0110\xE1nh b\u1EA1i Evil"
-  objectives: []
+  objectives:
+  - {fileID: 11400000, guid: 309a6367da995d947ba0888433f98bbe, type: 2}
+  - {fileID: 11400000, guid: 858d1e85dba53df45ad175e8253dcd31, type: 2}
+  - {fileID: 11400000, guid: 34a118d5c9d9ff24197b14c6b00e84fb, type: 2}
   reward:
     gold: 200
     exp: 200
-  prerequisiteQuest: {fileID: 11400000, guid: ed8b52461b5e0fe47b9598f4622d7aa9, type: 2}
+  prerequisiteQuest: {fileID: 0}
   isRepeatable: 0
-  dialogueAfterCompleted: {fileID: 0}
+  dialogueAfterCompleted: {fileID: 11400000, guid: 7f3747884cfb95949b2534afab6656f0, type: 2}

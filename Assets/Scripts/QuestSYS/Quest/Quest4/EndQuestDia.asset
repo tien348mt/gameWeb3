@@ -10,18 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 882732a6e728f554e9774f962e7efa63, type: 3}
-  m_Name: TalkStartDia
+  m_Name: EndQuestDia
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSO
   lines:
-  - speaker: {fileID: 11400000, guid: 876c65a99d3eb344c95eb7ac37bf355d, type: 2}
-    text: "Xin ch\xE0o!"
-  - speaker: {fileID: 11400000, guid: 74ff79ffe05808b42b97eed64edc1a63, type: 2}
-    text: "Ch\xE0o!"
-  - speaker: {fileID: 11400000, guid: 876c65a99d3eb344c95eb7ac37bf355d, type: 2}
-    text: "T\xF4i l\xE0 Dien"
-  - speaker: {fileID: 11400000, guid: 74ff79ffe05808b42b97eed64edc1a63, type: 2}
-    text: "T\xF4i l\xE0 Red Knight! C\xF3 chuy\u1EC7n g\xEC v\u1EADy?"
   - speaker: {fileID: 11400000, guid: 1d95eb2cb98893f4aac48af4a001c2e5, type: 2}
-    text: "T\xF4i  \u0111ang \u1EC9a th\xEC b\u1ECB gank"
+    text: "v\u1EC1 r \xE0!"
   - speaker: {fileID: 11400000, guid: 74ff79ffe05808b42b97eed64edc1a63, type: 2}
-    text: WTF???
+    text: "\u1EC8a \u0111\u01B0\u1EE3c ch\u01B0a?"
+  - speaker: {fileID: 11400000, guid: 1d95eb2cb98893f4aac48af4a001c2e5, type: 2}
+    text: "Xong r\u1ED3i. V\xE0ng n\xE8 :)))"

@@ -64,7 +64,7 @@ public class ChestEnemyRequirement : MonoBehaviour
 
         if (chestOpen != null)
             chestOpen.SetActive(true);
-
+        AudioManager.Instance.PlaySFX(1);
         GiveCoinReward();
     }
 

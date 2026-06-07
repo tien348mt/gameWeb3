@@ -19,7 +19,7 @@ public class ShopSlotUI : MonoBehaviour
     private string Wallet;
     private string priceETH;
     private string tokenId;
-
+    public GameObject showData;
     public void Setup(ItemData data, string price, string seller, string mDocId, string currentWallet, string tId)
     {
         itemData = data;
@@ -140,6 +140,16 @@ public class ShopSlotUI : MonoBehaviour
                     Destroy(gameObject);
                 }
             }
+        }
+    }
+
+    public void ShowDataItem()
+    {
+        GameObject instance = Instantiate(showData);
+        DataItemUI dataUI = instance.GetComponent<DataItemUI>();
+        if (dataUI != null)
+        {
+            dataUI.SetValueData(itemData); // truyền thẳng item vào
         }
     }
 }

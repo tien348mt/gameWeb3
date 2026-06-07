@@ -42,7 +42,7 @@ public class ChestRangeRequirement : MonoBehaviour
 
         if (chestOpen != null)
             chestOpen.SetActive(true);
-
+        AudioManager.Instance.PlaySFX(1);
         GiveCoinReward();
     }
 

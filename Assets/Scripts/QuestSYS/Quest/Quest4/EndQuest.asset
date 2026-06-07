@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8776e9ac0ffaf5f4c840ce7873093adf, type: 3}
-  m_Name: TalkStart
+  m_Name: EndQuest
   m_EditorClassIdentifier: Assembly-CSharp::TalkObjective
-  description: "N\xF3i chuy\u1EC7n v\u1EDBi Dien"
+  description: "N\xF3i chuy\u1EC7n v\u1EDBi Dien sau khi danh bai Evil"
   isCompleted: 0
   npcID: npc4
   dialogueToPlay:
-  - {fileID: 11400000, guid: f70985c43281a4e4e932275b875884ed, type: 2}
+  - {fileID: 11400000, guid: 24de5d7303ba87542a9687154ee090bc, type: 2}

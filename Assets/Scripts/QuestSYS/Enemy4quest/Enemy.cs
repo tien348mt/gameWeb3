@@ -36,4 +36,8 @@ public class QuestEnemy : BaseEnemy
         Debug.Log($"☠️ QuestEnemy chết: {enemyID}");
         QuestManager.Instance?.NotifyEnemyKilled(enemyID);
     }
+    public void SlashSFX()
+    {
+        AudioManager.Instance.PlaySFX(2);
+    }
 }

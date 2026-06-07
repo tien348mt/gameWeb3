@@ -82,4 +82,9 @@ public class DialogueManager : MonoBehaviour
         onDialogueEnded?.Invoke();
         onDialogueEnded.RemoveAllListeners();
     }
+
+    public void PlaySFXBtn()
+    {
+        AudioManager.Instance.PlaySFX(4);
+    }
 }

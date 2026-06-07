@@ -382,7 +382,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Minotaur
   itemDatabase: {fileID: 0}
   armorPrefab: {fileID: 5174251243474736721, guid: 7cde3018336cf5340a12b3d76ff7821c, type: 3}
-  dropChance: 36.3
+  dropChance: 33
 --- !u!95 &3178727196508905486
 Animator:
   serializedVersion: 7
@@ -465,7 +465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NormalEnemy
   player: {fileID: 0}
   detectionRange: 6
-  attackRange: 1.2
+  attackRange: 2.5
   moveSpeed: 3
   showAttackGizmos: 1
   hpBarFill: {fileID: 832455847227725758}
@@ -474,6 +474,7 @@ MonoBehaviour:
   attackCooldown: 1.5
   defense: 0
   exp: 10
+  coin: 10
 --- !u!1 &9021168338955490910
 GameObject:
   m_ObjectHideFlags: 0

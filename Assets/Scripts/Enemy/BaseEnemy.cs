@@ -54,6 +54,7 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
 
     private AIState currentState = AIState.Idle;
 
+    private AIState previousState = AIState.Idle;
     // ════════════════════════════════════════════════════════
     //  Unity lifecycle
     // ════════════════════════════════════════════════════════
@@ -101,7 +102,7 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
             if (attackTimer <= 0f)
                 currentState = AIState.Attack;
             else
-                currentState = AIState.Idle;
+                currentState = AIState.Chase;
         }
         else if (dist <= detectionRange)
         {
@@ -133,6 +134,12 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
             case AIState.Return:
                 DoReturn();
                 break;
+        }
+
+        if (currentState != previousState)
+        {
+            OnStateChanged(currentState);
+            previousState = currentState;
         }
     }
 
@@ -388,4 +395,19 @@ public abstract class BaseEnemy : MonoBehaviour, IDamageable, IKillable
             Gizmos.DrawWireSphere(attackPos, attackRange);
         }
     }
+
+    void OnStateChanged(AIState to)
+    {
+        if (to == AIState.Return || to == AIState.Idle)
+            CombatMusicManager.Instance?.ExitCombat(this);
+        else
+            CombatMusicManager.Instance?.EnterCombat(this);
+    }
+    // Thêm vào OnDestroy để tránh enemy chết còn nằm trong list
+    protected virtual void OnDestroy()
+    {
+        CombatMusicManager.Instance?.ExitCombat(this);
+    }
+
+
 }

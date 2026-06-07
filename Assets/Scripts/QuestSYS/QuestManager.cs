@@ -145,6 +145,7 @@ public class QuestManager : MonoBehaviour
             {
                 rewardUI.coin.text = "COIN: " + questSO.reward.gold.ToString();
                 rewardUI.exp.text = "EXP: " + questSO.reward.exp.ToString();
+                AudioManager.Instance.PlaySFX(3);
                 rewardUI.ShowReward();
             }
         }
