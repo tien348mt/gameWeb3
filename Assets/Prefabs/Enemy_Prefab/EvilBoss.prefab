@@ -373,6 +373,7 @@ GameObject:
   - component: {fileID: 6243928187275852260}
   - component: {fileID: 6102926055068004944}
   - component: {fileID: 8328960699858227503}
+  - component: {fileID: 8963322591601269434}
   m_Layer: 6
   m_Name: EvilBoss
   m_TagString: Untagged
@@ -548,3 +549,19 @@ MonoBehaviour:
   attackCooldown: 1.5
   defense: 20
   exp: 10
+  coin: 10
+--- !u!114 &8963322591601269434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8731996451538573884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6a2cf6d8208d0439c0ad3af1babd6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDropper
+  itemDatabase: {fileID: 0}
+  armorPrefab: {fileID: 5174251243474736721, guid: 7cde3018336cf5340a12b3d76ff7821c, type: 3}
+  dropChance: 50

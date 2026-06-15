@@ -16,6 +16,6 @@ MonoBehaviour:
   - speaker: {fileID: 11400000, guid: 1d95eb2cb98893f4aac48af4a001c2e5, type: 2}
     text: "v\u1EC1 r \xE0!"
   - speaker: {fileID: 11400000, guid: 74ff79ffe05808b42b97eed64edc1a63, type: 2}
-    text: "\u1EC8a \u0111\u01B0\u1EE3c ch\u01B0a?"
+    text: "\u0110\xE3 xong"
   - speaker: {fileID: 11400000, guid: 1d95eb2cb98893f4aac48af4a001c2e5, type: 2}
-    text: "Xong r\u1ED3i. V\xE0ng n\xE8 :)))"
+    text: "Oke. V\xE0ng n\xE8 :)))"
